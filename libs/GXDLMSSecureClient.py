@@ -1,7 +1,7 @@
-from gurux.dlms.enums import InterfaceType, Authentication
+from libs.gurux.dlms.enums import InterfaceType, Authentication
 from .GXDLMSClient import GXDLMSClient
-from gurux.dlms import GXCiphering
-from gurux.dlms import GXDLMSChipperingStream
+from libs.gurux.dlms import GXCiphering
+from libs.gurux.dlms import GXDLMSChipperingStream
 
 
 # pylint: disable=too-many-arguments

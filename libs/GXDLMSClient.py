@@ -1,34 +1,34 @@
 from __future__ import print_function
-from gurux.dlms.GXDLMSSettings import GXDLMSSettings
-from gurux.dlms.enums import Authentication, InterfaceType, SourceDiagnostic, DataType, Conformance
-from gurux.dlms.ConnectionState import ConnectionState
-from gurux.dlms.GXByteBuffer import GXByteBuffer
-from gurux.dlms.GXHdlcSettings import GXHdlcSettings
-from gurux.dlms.enums import Command, ObjectType
-from gurux.dlms.GXDLMS import GXDLMS
-from gurux.dlms._GXAPDU import _GXAPDU
-from gurux.dlms._HDLCInfo import _HDLCInfo
-from gurux.dlms.GXDLMSLNParameters import GXDLMSLNParameters
-from gurux.dlms.ActionRequestType import ActionRequestType
-from gurux.dlms.internal._GXCommon import _GXCommon
-from gurux.dlms.GetCommandType import GetCommandType
-from gurux.dlms.objects import GXDLMSObject, GXDLMSObjectCollection, GXDLMSData
-from gurux.dlms.internal._GXDataInfo import _GXDataInfo
-from gurux.dlms.ValueEventArgs import ValueEventArgs
-from gurux.dlms.GXDateTime import GXDateTime
-from gurux.dlms.SetRequestType import SetRequestType
-from gurux.dlms.GXDLMSSNParameters import GXDLMSSNParameters
-from gurux.dlms.VariableAccessSpecification import VariableAccessSpecification
-from gurux.dlms.GXSecure import GXSecure
-from gurux.dlms.GXDLMSConverter import GXDLMSConverter
-from gurux.dlms.GXDLMSLNCommandHandler import GXDLMSLNCommandHandler
-from gurux.dlms.GXDLMSSNCommandHandler import GXDLMSSNCommandHandler
-from gurux.dlms.enums.AccessServiceCommandType import AccessServiceCommandType
-from gurux.dlms.enums.ErrorCode import ErrorCode
-from gurux.dlms.GXDLMSTranslatorStructure import GXDLMSTranslatorStructure
-from gurux.dlms.enums.RequestTypes import RequestTypes
-from gurux.dlms.SerialnumberCounter import SerialNumberCounter
-from gurux.dlms._GXObjectFactory import _GXObjectFactory
+from libs.gurux.dlms.GXDLMSSettings import GXDLMSSettings
+from libs.gurux.dlms.enums import Authentication, InterfaceType, SourceDiagnostic, DataType, Conformance
+from libs.gurux.dlms import ConnectionState
+from libs.gurux.dlms import GXByteBuffer
+from libs.gurux.dlms.GXHdlcSettings import GXHdlcSettings
+from libs.gurux.dlms.enums import Command, ObjectType
+from libs.gurux.dlms import GXDLMS
+from libs.gurux.dlms import _GXAPDU
+from libs.gurux.dlms._HDLCInfo import _HDLCInfo
+from libs.gurux.dlms.GXDLMSLNParameters import GXDLMSLNParameters
+from libs.gurux.dlms.ActionRequestType import ActionRequestType
+from libs.gurux.dlms.internal._GXCommon import _GXCommon
+from libs.gurux.dlms.GetCommandType import GetCommandType
+from libs.gurux.dlms.objects import GXDLMSObject, GXDLMSObjectCollection, GXDLMSData
+from libs.gurux.dlms.internal._GXDataInfo import _GXDataInfo
+from libs.gurux.dlms import ValueEventArgs
+from libs.gurux.dlms import GXDateTime
+from libs.gurux.dlms import SetRequestType
+from libs.gurux.dlms import GXDLMSSNParameters
+from libs.gurux.dlms.VariableAccessSpecification import VariableAccessSpecification
+from libs.gurux.dlms.GXSecure import GXSecure
+from libs.gurux.dlms import GXDLMSConverter
+from libs.gurux.dlms.GXDLMSLNCommandHandler import GXDLMSLNCommandHandler
+from libs.gurux.dlms import GXDLMSSNCommandHandler
+from libs.gurux.dlms.enums.AccessServiceCommandType import AccessServiceCommandType
+from libs.gurux.dlms.enums import ErrorCode
+from libs.gurux.dlms import GXDLMSTranslatorStructure
+from libs.gurux.dlms.enums import RequestTypes
+from libs.gurux.dlms import SerialNumberCounter
+from libs.gurux.dlms._GXObjectFactory import _GXObjectFactory
 
 
 # pylint:disable=bad-option-value,too-many-instance-attributes,too-many-arguments,too-many-public-methods,useless-object-inheritance

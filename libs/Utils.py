@@ -1,14 +1,13 @@
 from datetime import datetime
-import re
-from time import sleep
 
 import pandas as pd
 
-from gurux.dlms import GXDateTime
-from gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSHdlcSetup
+from libs.gurux.dlms import GXDateTime
+from libs.gurux.dlms.objects import GXDLMSProfileGeneric
 
 
 def unloading_energy_profile_for_recording_interval_1(open_and_close_connection, sample):
+    print("Начал запись Профиль энергии на 1-ом интервале...")
     data = GXDLMSProfileGeneric("1.0.99.1.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -34,6 +33,7 @@ def unloading_energy_profile_for_recording_interval_1(open_and_close_connection,
 
 
 def unloading_energy_profile_for_recording_interval_2(open_and_close_connection, sample):
+    print("Начал запись Профиль энергии на 2-ом интервале...")
     data = GXDLMSProfileGeneric("1.0.99.2.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -59,6 +59,7 @@ def unloading_energy_profile_for_recording_interval_2(open_and_close_connection,
 
 
 def unloading_monthly_profile(open_and_close_connection, sample):
+    print("Начал запись Месячного профиля...")
     data = GXDLMSProfileGeneric("1.0.98.1.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -134,6 +135,7 @@ def unloading_monthly_profile(open_and_close_connection, sample):
 
 
 def unloading_daily_profile(open_and_close_connection, sample):
+    print("Начал запись Суточного профиля...")
     data = GXDLMSProfileGeneric("1.0.98.2.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -209,6 +211,7 @@ def unloading_daily_profile(open_and_close_connection, sample):
 
 
 def unloading_arthur_slice(open_and_close_connection, sample):
+    print("Начал запись Среза мгновенных значений...")
     data = GXDLMSProfileGeneric("1.0.99.164.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -320,7 +323,7 @@ def unloading_arthur_slice(open_and_close_connection, sample):
             data_23.append(logs[i][23])
             data_24.append(logs[i][24])
             leave.append(logs[i][25])
-        dictionary = {"Метка даты и времени": time,
+        dictionary = {"Время фиксации записи": time,
                       "Ток фазы А": data_1,
                       'Ток фазы B': data_2,
                       'Ток фазы C': data_3,
@@ -353,6 +356,7 @@ def unloading_arthur_slice(open_and_close_connection, sample):
 
 
 def unloading_the_voltage_log(open_and_close_connection, sample):
+    print("Начал запись Журнала напряжения...")
     data = GXDLMSProfileGeneric("0.0.99.98.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -386,6 +390,7 @@ def unloading_the_voltage_log(open_and_close_connection, sample):
 
 
 def unloading_currents_log(open_and_close_connection, sample):
+    print("Начал запись Журнала токов...")
     data = GXDLMSProfileGeneric("0.0.99.98.1.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -410,6 +415,7 @@ def unloading_currents_log(open_and_close_connection, sample):
 
 
 def unloading_on_off_log(open_and_close_connection, sample):
+    print("Начал запись Журнала вкл/выкл...")
     data = GXDLMSProfileGeneric("0.0.99.98.2.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -434,6 +440,7 @@ def unloading_on_off_log(open_and_close_connection, sample):
 
 
 def unloading_data_correction_log(open_and_close_connection, sample):
+    print("Начал запись Журнала коррекции данных...")
     data = GXDLMSProfileGeneric("0.0.99.98.3.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -461,6 +468,7 @@ def unloading_data_correction_log(open_and_close_connection, sample):
 
 
 def unloading_external_impacts_log(open_and_close_connection, sample):
+    print("Начал запись Журнала внешних воздействий...")
     data = GXDLMSProfileGeneric("0.0.99.98.4.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -485,6 +493,7 @@ def unloading_external_impacts_log(open_and_close_connection, sample):
 
 
 def unloading_communication_events_log(open_and_close_connection, sample):
+    print("Начал запись Журнала коммуникационных событий...")
     data = GXDLMSProfileGeneric("0.0.99.98.5.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -522,6 +531,7 @@ def unloading_communication_events_log(open_and_close_connection, sample):
 
 
 def unloading_access_control_log(open_and_close_connection, sample):
+    print("Начал запись Журнала контроля доступа...")
     data = GXDLMSProfileGeneric("0.0.99.98.6.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -557,6 +567,7 @@ def unloading_access_control_log(open_and_close_connection, sample):
 
 
 def unloading_self_diagnosis_log(open_and_close_connection, sample):
+    print("Начал запись Журнала самодиагностики...")
     data = GXDLMSProfileGeneric("0.0.99.98.7.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -581,6 +592,7 @@ def unloading_self_diagnosis_log(open_and_close_connection, sample):
 
 
 def unloading_excess_load_tangent_log(open_and_close_connection, sample):
+    print("Начал запись Журнала превышения тангенса нагрузки...")
     data = GXDLMSProfileGeneric("0.0.99.98.8.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -605,6 +617,7 @@ def unloading_excess_load_tangent_log(open_and_close_connection, sample):
 
 
 def unloading_network_quality_log(open_and_close_connection, sample):
+    print("Начал запись Журнала качества сети...")
     data = GXDLMSProfileGeneric("0.0.99.98.9.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -629,6 +642,7 @@ def unloading_network_quality_log(open_and_close_connection, sample):
 
 
 def unloading_tangent_goes_beyond_log(open_and_close_connection, sample):
+    print("Начал запись Журнала выход тангенса за порог...")
     data = GXDLMSProfileGeneric("0.0.99.98.12.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -648,6 +662,7 @@ def unloading_tangent_goes_beyond_log(open_and_close_connection, sample):
 
 
 def unloading_time_correction_log(open_and_close_connection, sample):
+    print("Начал запись Журнала коррекции времени...")
     data = GXDLMSProfileGeneric("0.0.99.98.13.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -658,7 +673,7 @@ def unloading_time_correction_log(open_and_close_connection, sample):
         time.append(ref_date_time(logs[i][0]))
         err.append(ref_date_time(logs[i][1]))
         leave.append(logs[i][2])
-    dictionary = {"Текущие дата и время": time,
+    dictionary = {"Время фиксации записи": time,
                   'Старое время': err,
                   "Время работы ПУ": leave}
     df = pd.DataFrame(dictionary)
@@ -667,6 +682,7 @@ def unloading_time_correction_log(open_and_close_connection, sample):
 
 
 def unloading_network_quality_for_the_billing_period_log(open_and_close_connection, sample):
+    print("Начал запись Журнала качества сети за расчетный период...")
     data = GXDLMSProfileGeneric("0.0.99.98.15.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -689,6 +705,7 @@ def unloading_network_quality_for_the_billing_period_log(open_and_close_connecti
 
 
 def unloading_power_log(open_and_close_connection, sample):
+    print("Начал запись Журнала мощности...")
     data = GXDLMSProfileGeneric("0.0.99.98.16.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -713,6 +730,7 @@ def unloading_power_log(open_and_close_connection, sample):
 
 
 def unloading_battery_charge_status_monitoring_log(open_and_close_connection, sample):
+    print("Начал запись Журнала контроля состояния заряда батареи...")
     data = GXDLMSProfileGeneric("0.0.99.98.17.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -737,6 +755,7 @@ def unloading_battery_charge_status_monitoring_log(open_and_close_connection, sa
 
 
 def unloading_load_relay_blocker_control_log(open_and_close_connection, sample):
+    print("Начал запись Журнала контроля блокиратора реле нагрузки...")
     data = GXDLMSProfileGeneric("0.0.99.98.18.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -761,6 +780,7 @@ def unloading_load_relay_blocker_control_log(open_and_close_connection, sample):
 
 
 def unloading_temperature_log(open_and_close_connection, sample):
+    print("Начал запись Журнала температуры...")
     data = GXDLMSProfileGeneric("0.0.99.98.19.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -785,6 +805,7 @@ def unloading_temperature_log(open_and_close_connection, sample):
 
 
 def unloading_discrete_in_and_out_states_log(open_and_close_connection, sample):
+    print("Начал запись Журнала состояний дискреток...")
     data = GXDLMSProfileGeneric("0.0.99.98.10.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
@@ -919,24 +940,24 @@ EventCommunicationCode = [
     (2, "Установлено соединение")
 ]
 
-EventCurrentCode = [
-    (1, "Фаза A - экспорт начало"),
-    (2, "Фаза A - экспорт окончание"),
-    (3, "Фаза B - экспорт начало"),
-    (4, "Фаза B - экспорт окончание"),
-    (5, "Фаза C - экспорт начало"),
-    (6, "Фаза C - экспорт окончание"),
-    (7, "Обрыв трансформатора тока фазы A"),
-    (8, "Восстановление трансформатора тока фазы A"),
-    (9, "Обрыв трансформатора тока фазы B"),
-    (10, "Восстановление трансформатора тока фазы B"),
-    (11, "Обрыв трансформатора тока фазы C"),
-    (12, "Восстановление трансформатора тока фазы C"),
-    (13, "Небаланс токов - начало"),
-    (14, "Небаланс токов - окончание"),
-    (15, "Замыкание трансформатора тока - начало"),
-    (16, "Окончание замыкания трансформатора тока")
-]
+# EventCurrentCode = [
+#     (1, "Фаза A - экспорт начало"),
+#     (2, "Фаза A - экспорт окончание"),
+#     (3, "Фаза B - экспорт начало"),
+#     (4, "Фаза B - экспорт окончание"),
+#     (5, "Фаза C - экспорт начало"),
+#     (6, "Фаза C - экспорт окончание"),
+#     (7, "Обрыв трансформатора тока фазы A"),
+#     (8, "Восстановление трансформатора тока фазы A"),
+#     (9, "Обрыв трансформатора тока фазы B"),
+#     (10, "Восстановление трансформатора тока фазы B"),
+#     (11, "Обрыв трансформатора тока фазы C"),
+#     (12, "Восстановление трансформатора тока фазы C"),
+#     (13, "Небаланс токов - начало"),
+#     (14, "Небаланс токов - окончание"),
+#     (15, "Замыкание трансформатора тока - начало"),
+#     (16, "Окончание замыкания трансформатора тока")
+# ]
 
 EventProgramingCode = [
     (1, "Изменение адреса или скорости обмена RS-485-1 (Порт P2)"),
@@ -1200,26 +1221,15 @@ EventAccessCode = [(1, "Попытка несанкционированного 
                    (4, "Ошибка верификации прошивки")]
 
 
-def setting_the_speed_to_default_values(reader):
-    try:
-        data_1 = GXDLMSHdlcSetup('0.0.22.0.0.255')
-        data_2 = GXDLMSHdlcSetup('0.1.22.0.0.255')
-        data_1.communicationSpeed = 5
-        data_2.communicationSpeed = 5
-        print("Устанавливаем скорость соединения на всех портах на 9600")
-        reader.write(data_1, 2)
-        reader.write(data_2, 2)
-    except Exception as e:
-        print("Не удалось установить скорость на дефолтные значения")
-        print(e.args)
-
-
 def create_sheet_in_excel_file(data, writer, sheet_name, reader, sample):
-    data(reader, sample).to_excel(writer, sheet_name=sheet_name, index=False)
-    sheet1 = writer.sheets[sheet_name]
-    sheet1.set_column('A:A', 23)
-    sheet1.set_column('B:B', 60)
-    sheet1.set_column('C:U', 40)
+    try:
+        data(reader, sample).to_excel(writer, sheet_name=sheet_name, index=False)
+        sheet1 = writer.sheets[sheet_name]
+        sheet1.set_column('A:A', 23)
+        sheet1.set_column('B:B', 60)
+        sheet1.set_column('C:U', 40)
+    except Exception as e:
+        print(f"Ошибка {e} при создании excel файла или считывании '{sheet_name}'")
 
 
 def is_valid_date(date_string):
@@ -1230,37 +1240,19 @@ def is_valid_date(date_string):
         return False
 
 
-def sample_config():
-    flag = 'N'
+def is_valid_date_for_anal(date_string):
+    try:
+        datetime.strptime(date_string, "%d.%m.%y %H:%M:%S")
+        return True
+    except ValueError:
+        return False
 
-    while True:
-        flag = input("Будем делать выборку Y/N: ")
-        if flag not in ['Y', 'y', 'N', 'n']:
-            print(f'Сделайте правильный выбор')
-            continue
-        else:
-            break
 
-    if flag in ['Y', 'y']:
-        while True:
-            start_date = input('Введите стартовую дату в формате\'31.12.2024\': ')
-            if is_valid_date(start_date):
-                break
-            else:
-                print('Неверный формат. Попробуйте еще раз')
-                continue
-
-        while True:
-            end_date = input('Введите конечную дату в формате \'31.01.2024\': ')
-            if is_valid_date(end_date):
-                break
-            else:
-                print('Неверный формат. Попробуйте еще раз')
-                continue
-
-        return [start_date, end_date]
+def sample_config(flag, start, end):
+    if flag:
+        return [start, end]
     else:
-        return [flag]
+        return ['N']
 
 
 def range_by_date(reader, data, sample):
@@ -1274,9 +1266,12 @@ def range_by_date(reader, data, sample):
 
 
 def ref_date_time(date_time):
-    res = datetime.strptime(str(date_time), "%m/%d/%y %H:%M:%S")
-    res = res.strftime("%d.%m.%y %H:%M:%S")
-    return res
+    try:
+        res = datetime.strptime(str(date_time), "%m/%d/%y %H:%M:%S")
+        res = res.strftime("%d.%m.%y %H:%M:%S")
+        return res
+    except Exception as e:
+        return "FFFFFFFF"
 
 
 def parsing_port_number(port_number):
@@ -1330,16 +1325,16 @@ client_address = [(16, "Публичный клиент"),
 
 
 def voltage_with_scalar(voltage):
-    return voltage*0.001
+    return voltage * 0.001
 
 
 def hertz_with_scalar(hertz):
-    return hertz*0.001
+    return hertz * 0.001
 
 
 def current_with_scalar(current):
-    return current*0.001
+    return current * 0.001
 
 
 def power_with_scalar(power):
-    return power*0.001
+    return power * 0.001

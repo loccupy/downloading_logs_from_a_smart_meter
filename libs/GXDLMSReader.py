@@ -4,18 +4,19 @@ import random
 import time
 import traceback
 
-from gurux.common import ReceiveParameters, GXCommon, TimeoutException
-from gurux.common.enums import TraceLevel
-from gurux.common.io import Parity, StopBits
-from gurux.dlms import GXByteBuffer, GXReplyData, GXDLMSTranslator, GXDLMSException, GXDLMSAccessItem, \
+from libs.gurux.common import ReceiveParameters, GXCommon, TimeoutException
+from libs.gurux.common.enums import TraceLevel
+from libs.gurux.common.io import Parity, StopBits
+from libs.gurux.dlms import GXByteBuffer, GXReplyData, GXDLMSTranslator, GXDLMSException, GXDLMSAccessItem, \
     GXTime, GXDateTime, GXDate
-from gurux.dlms.enums import InterfaceType, ObjectType, Authentication, Conformance, DataType, \
+from libs.gurux.dlms.enums import ObjectType, Authentication, Conformance, DataType, \
     Security, AssociationResult, SourceDiagnostic, AccessServiceCommandType
-from gurux.dlms.objects import GXDLMSObject, GXDLMSObjectCollection, GXDLMSData, GXDLMSRegister, \
+from libs.gurux.dlms.enums import InterfaceType
+from libs.gurux.dlms.objects import GXDLMSObject, GXDLMSObjectCollection, GXDLMSData, GXDLMSRegister, \
     GXDLMSDemandRegister, GXDLMSProfileGeneric, GXDLMSExtendedRegister, GXDLMSDisconnectControl, \
     GXDLMSActivityCalendar, GXDLMSDayProfile, GXDLMSWeekProfile, GXDLMSSeasonProfile, GXDLMSDayProfileAction, \
     GXDLMSScriptTable, GXDLMSSpecialDaysTable
-from gurux.net import GXNet
+from libs.gurux.net import GXNet
 
 
 class GXDLMSReader(GXDLMSDisconnectControl):
@@ -24,7 +25,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
         super().__init__()
         # pylint: disable=too-many-arguments
         self.replyBuff = bytearray(8 + 1024)
-        self.waitTime = 5000
+        self.waitTime = 1000
         self.logFile = open("../logFile.txt", "w")
         self.trace = trace
         self.media = media
@@ -32,6 +33,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
         self.client = client
         self.deviceType = ""
         # if self.trace > TraceLevel.WARNING:
+        #     print("<<Соединение установлено>>")
             # print("Authentication: " + str(self.client.authentication))
             # print("ClientAddress: " + hex(self.client.clientAddress))
             # print("ServerAddress: " + hex(self.client.serverAddress))
@@ -61,7 +63,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
     def close(self):
         # pylint: disable=broad-except
         if self.media and self.media.isOpen():
-            print("DisconnectRequest")
+
             reply = GXReplyData()
             try:
                 # Release is call only for secured connections.
@@ -75,6 +77,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
             reply.clear()
             self.readDLMSPacket(self.client.disconnectRequest(), reply)
             self.media.close()
+            print("<<Соединение разорвано>>")
 
     @classmethod
     def now(cls):
@@ -269,13 +272,13 @@ class GXDLMSReader(GXDLMSDisconnectControl):
 
     def initializeConnection(self):
         # print("Standard: " + str(self.client.standard))
-        if self.client.ciphering.security != Security.NONE:
-            print("Security: " + str(self.client.ciphering.security))
-            print("System title: " + GXCommon.toHex(self.client.ciphering.systemTitle))
-            print("Authentication key: " + GXCommon.toHex(self.client.ciphering.authenticationKey))
-            print("Block cipher key: " + GXCommon.toHex(self.client.ciphering.blockCipherKey))
-            if self.client.ciphering.dedicatedKey:
-                print("Dedicated key: " + GXCommon.toHex(self.client.ciphering.dedicatedKey))
+        # if self.client.ciphering.security != Security.NONE:
+        #     print("Security: " + str(self.client.ciphering.security))
+        #     print("System title: " + GXCommon.toHex(self.client.ciphering.systemTitle))
+        #     print("Authentication key: " + GXCommon.toHex(self.client.ciphering.authenticationKey))
+        #     print("Block cipher key: " + GXCommon.toHex(self.client.ciphering.blockCipherKey))
+        #     if self.client.ciphering.dedicatedKey:
+        #         print("Dedicated key: " + GXCommon.toHex(self.client.ciphering.dedicatedKey))
         self.updateFrameCounter()
         self.initializeOpticalHead()
         reply = GXReplyData()
@@ -295,6 +298,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
                     self.readDLMSPacket(it, reply)
                 self.client.parseApplicationAssociationResponse(reply.data)
                 self.setDeviceType()
+                print("<<Соединение установлено>>")
             except GXDLMSException as ex:
                 # Invalid password.
                 raise GXDLMSException(AssociationResult.PERMANENT_REJECTED, SourceDiagnostic.AUTHENTICATION_FAILURE)

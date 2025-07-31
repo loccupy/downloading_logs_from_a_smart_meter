@@ -1,9 +1,9 @@
-from gurux.common.enums import TraceLevel
-from gurux.common.io import Parity, StopBits
-from gurux.dlms.enums import Authentication
-from gurux.net import GXNet
-from gurux.net.enums import NetworkType
-from gurux.serial.GXSerial import GXSerial
+from libs.gurux.common.enums import TraceLevel
+from libs.gurux.common.io import Parity, StopBits
+from libs.gurux.dlms.enums import Authentication
+from libs.gurux.net import GXNet
+from libs.gurux.net.enums import NetworkType
+from libs.gurux.serial import GXSerial
 
 from .GXDLMSClient import GXDLMSClient
 from .GXDLMSSecureClient import GXDLMSSecureClient

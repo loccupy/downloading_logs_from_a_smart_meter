@@ -4,7 +4,7 @@ import sys
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
-from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
+from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QFileDialog
 
 from libs.connect import get_reader, speeding_up_the_connection, init_connect, \
     close_reader, setting_the_speed_to_default_values
@@ -98,7 +98,7 @@ class UiForLogLoader(QWidget):
         # self.read.clicked.connect(self.read_log)
 
         self.analisys = self.findChild(QtWidgets.QPushButton, 'analisys')
-        self.analisys.clicked.connect(self.analysis)
+        # self.analisys.clicked.connect(self.analysis)
 
         self.text_edit = self.findChild(QtWidgets.QTextEdit, 'textEdit')
         self.text_edit.setReadOnly(True)  # Запрещаем редактирование
@@ -110,7 +110,7 @@ class UiForLogLoader(QWidget):
         self.applyDarkTheme()
 
         self.read.clicked.connect(self.start_read_log_thread)
-        # self.analisys.clicked.connect(self.start_analysis_thread)
+        self.analisys.clicked.connect(self.start_analysis_thread)
 
     def get_params(self):
         try:
@@ -136,6 +136,7 @@ class UiForLogLoader(QWidget):
 
             init_connect(self.reader, self.settings)
             new_baud = speeding_up_the_connection(self.reader)
+            print('Переподключение с новой скоростью....')
             close_reader(self.reader)
 
             self.reader, self.settings = get_reader(self.com_port, self.passw, self.serial_number, new_baud)
@@ -169,7 +170,21 @@ class UiForLogLoader(QWidget):
 
     def analysis(self):
         try:
-            file_name, device_type = self.file_name
+            # file_name, device_type = self.file_name
+
+            # options = QFileDialog.Options()
+            # options |= QFileDialog.ReadOnly
+            # filename, _ = QFileDialog.getOpenFileName(
+            #     self,
+            #     "Выберите файл",
+            #     "",
+            #     "Все файлы (*);;Текстовые файлы (*.xlsx)",
+            #     options=options
+            # )
+            # if filename:
+            #     self.file_name = filename
+
+            file_name =  self.file_name
 
             current_log_analysis(file_name)
             self_diagnosis_log_analysis(file_name)
@@ -186,7 +201,7 @@ class UiForLogLoader(QWidget):
             network_quality_for_period_log_analysis(file_name)
             on_and_off_log_analysis(file_name)
             external_influences_log_analysis(file_name)
-            if device_type == 'TT':
+            if 'TT' in self.file_name:
                 sampling_status_log_analysis(file_name)
             daily_profile_log_analysis(file_name)
             month_profile_log_analysis(file_name)
@@ -219,23 +234,29 @@ class UiForLogLoader(QWidget):
             return
 
         self.read.setEnabled(False)
+        self.analisys.setEnabled(False)
         self.thread = WorkerThread(self, self.read_log)
         self.thread.finished.connect(self.on_read_finished)
         self.thread.error.connect(self.on_error)
         self.thread.start()
 
     def start_analysis_thread(self):
-        if self.file_name is None:
-            QMessageBox.warning(
-                self,
-                "Ошибка",
-                f"Анализ доступен сразу после считывания журналов!"
-            )
-            return
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Выберите файл",
+            "",
+            "Все файлы (*);;Текстовые файлы (*.xlsx)",
+            options=options
+        )
+        if filename:
+            self.file_name = filename
         if self.thread and self.thread.isRunning():
             return
 
         self.analisys.setEnabled(False)
+        self.read.setEnabled(False)
         self.thread = WorkerThread(self, self.analysis)
         self.thread.finished.connect(self.on_analysis_finished)
         self.thread.error.connect(self.on_error)
@@ -243,10 +264,12 @@ class UiForLogLoader(QWidget):
 
     def on_read_finished(self, result):
         self.read.setEnabled(True)
+        self.analisys.setEnabled(True)
         self.thread = None
 
     def on_analysis_finished(self, result):
         self.analisys.setEnabled(True)
+        self.read.setEnabled(True)
         self.thread = None
 
     def on_error(self, error_message):

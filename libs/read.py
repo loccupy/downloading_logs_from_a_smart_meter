@@ -7,10 +7,10 @@ def read_logs(reader, flag_temperatyre, viborka, start, end):
         sample = sample_config(viborka, start, end)
         device_type = reader.deviceType
 
-        print("Установлено соединение для считывания журналов")
+        print("\nСтарт считывания журналов...\n")
         serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
         time = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
-        file_name = f"Serial_{serial_number}_{time}.xlsx"
+        file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
         excel_writer = pd.ExcelWriter(file_name)
 
         create_sheet_in_excel_file(unloading_currents_log, excel_writer, 'Журнал токов', reader, sample)

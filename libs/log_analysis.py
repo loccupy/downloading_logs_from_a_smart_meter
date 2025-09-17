@@ -1,6 +1,7 @@
 import datetime
 from datetime import timedelta
 
+from dateutil.relativedelta import relativedelta
 from openpyxl.reader.excel import load_workbook
 from openpyxl.styles import PatternFill
 
@@ -111,7 +112,7 @@ def ipu_working_hours_ref(sheets, log_name):
             res = int(cell_1.value) - int(cell_0.value)
 
             # Проверяем условие
-            if res <= 0:
+            if res < 0:
                 cell_0.fill = pink_fill
                 cell_1.fill = pink_fill
 
@@ -122,3 +123,82 @@ def ipu_working_hours_ref(sheets, log_name):
 
     except Exception as e:
         raise e
+
+
+# проверяет очередность валидных дат в столбце "Время фиксации записи" в суточном профиле
+def time_ordering_analysis_for_daily_profile(sheets, log_name):
+    format_dt = "%d.%m.%y %H:%M:%S"
+    try:
+        sheet = sheets[log_name]
+        column = None
+        column_names = [cell for cell in sheet[1]]
+        # Получаем номер столбца по названию
+        for i in column_names:
+            if i.value == 'Время фиксации записи':
+                column = i.column
+                break
+
+        # Проверяем все значения столбца и, в случае совпадения условия, перекрашиваем ячейку
+        for i, row in enumerate(sheet.iter_rows(min_row=2, min_col=column, max_col=column)):
+            # Получаем и сохраняем первую ячейку + пропускаем ее для обработки
+            if i == 0:
+                cell_0 = row[0]
+                continue
+
+            # Получаем ячейку
+            cell_1 = row[0]
+
+            if is_valid_date_for_anal(str(cell_0.value)) and is_valid_date_for_anal(str(cell_1.value)):
+                delta = (datetime.datetime.strptime(str(cell_1.value), format_dt) -
+                         datetime.datetime.strptime(str(cell_0.value), format_dt))
+                # Проверяем условие
+                if delta != timedelta(days=1):
+                    cell_0.fill = pink_fill
+                    cell_1.fill = pink_fill
+
+                    print(
+                        f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
+                        f" '{log_name.replace(" ", "е ", 1)}'")
+            cell_0 = row[0]
+    except Exception as e:
+        raise
+
+
+# проверяет очередность валидных дат в столбце "Время фиксации записи" в месячном профиле
+def time_ordering_analysis_for_month_profile(sheets, log_name):
+    format_dt = "%d.%m.%y %H:%M:%S"
+    try:
+        sheet = sheets[log_name]
+        column = None
+        column_names = [cell for cell in sheet[1]]
+        # Получаем номер столбца по названию
+        for i in column_names:
+            if i.value == 'Время фиксации записи':
+                column = i.column
+                break
+
+        # Проверяем все значения столбца и, в случае совпадения условия, перекрашиваем ячейку
+        for i, row in enumerate(sheet.iter_rows(min_row=2, min_col=column, max_col=column)):
+            # Получаем и сохраняем первую ячейку + пропускаем ее для обработки
+            if i == 0:
+                cell_0 = row[0]
+                continue
+
+            # Получаем ячейку
+            cell_1 = row[0]
+
+            if is_valid_date_for_anal(str(cell_0.value)) and is_valid_date_for_anal(str(cell_1.value)):
+                date_1 = datetime.datetime.strptime(str(cell_0.value), format_dt)
+                date_2 = datetime.datetime.strptime(str(cell_1.value), format_dt)
+                delta = relativedelta(date_2, date_1)
+                # Проверяем условие
+                if not (delta.months == 1 and delta.days == 0):
+                    cell_0.fill = pink_fill
+                    cell_1.fill = pink_fill
+
+                    print(
+                        f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
+                        f" '{log_name.replace(" ", "е ", 1)}'")
+            cell_0 = row[0]
+    except Exception as e:
+        raise

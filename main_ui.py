@@ -64,13 +64,13 @@ class UiForLogLoader(QWidget):
 
         uic.loadUi(ui_path, self)
 
-        # self.baud = self.findChild(QtWidgets.QLineEdit, 'speed')
-        # self.baud.setValidator(QIntValidator())
-        # self.baud.setMaxLength(6)
+        self.port = self.findChild(QtWidgets.QLineEdit, 'port')
+        self.port.setValidator(QIntValidator())
+        self.port.setMaxLength(5)
 
         self.serial = self.findChild(QtWidgets.QLineEdit, 'serial')
         self.serial.setValidator(QIntValidator())
-        self.serial.setMaxLength(5)
+        self.serial.setMaxLength(4)
 
         self.ip = self.findChild(QtWidgets.QLineEdit, 'ip')
         # self.ip.setValidator(QIntValidator())
@@ -116,8 +116,8 @@ class UiForLogLoader(QWidget):
 
     def get_params(self):
         try:
-            self.ip = self.ip.text()
-            # self.baud_rate = int(self.baud.text())
+            self.ip_meter = self.ip.text()
+            self.port_number = str(self.port.text())
             self.serial_number = int(self.serial.text())
             self.passw = self.field_password.text()
             if self.password.isChecked() is False:
@@ -130,44 +130,53 @@ class UiForLogLoader(QWidget):
             print(f"Ошибка при считывании данных из полей >> {e}")
             raise
 
-    def _speeding_up(self):
-        try:
-            self.get_params()
-
-            self.reader, self.settings = get_reader_with_ip(self.ip, self.passw, self.serial_number, self.baud_rate)
-            #
-            # init_connect(self.reader, self.settings)
-            # new_baud = speeding_up_the_connection(self.reader)
-            # print('Переподключение с новой скоростью....')
-            # close_reader(self.reader)
-            #
-            # self.reader, self.settings = get_reader_with_ip(self.com_port, self.passw, self.serial_number, new_baud)
-
-            init_connect(self.reader, self.settings)
-        except Exception as e:
-            self.settings.media.close()
-            raise
-
-    def _speeding_down_and_close(self):
-        try:
-            # init_connect(self.reader, self.settings)
-            # setting_the_speed_to_default_values(self.reader)
-            close_reader(self.reader)
-        except Exception as e:
-            self.settings.media.close()
-            print(f"Ошибка при установке соединения на дефолтные 9600 >> {e}.")
-            raise
+    # def _speeding_up(self):
+    #     try:
+    #         self.get_params()
+    #
+    #         self.reader, self.settings = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
+    #                                                         self.baud_rate)
+    #         #
+    #         # init_connect(self.reader, self.settings)
+    #         # new_baud = speeding_up_the_connection(self.reader)
+    #         # print('Переподключение с новой скоростью....')
+    #         # close_reader(self.reader)
+    #         #
+    #         # self.reader, self.settings = get_reader_with_ip(self.com_port, self.passw, self.serial_number, new_baud)
+    #
+    #         init_connect(self.reader, self.settings)
+    #     except Exception as e:
+    #         self.settings.media.close()
+    #         raise
+    #
+    # def _speeding_down_and_close(self):
+    #     try:
+    #         # init_connect(self.reader, self.settings)
+    #         # setting_the_speed_to_default_values(self.reader)
+    #         close_reader(self.reader)
+    #     except Exception as e:
+    #         self.settings.media.close()
+    #         print(f"Ошибка при установке соединения на дефолтные 9600 >> {e}.")
+    #         raise
 
     def read_log(self):
         try:
-            self._speeding_up()
+            # self._speeding_up()
+            self.get_params()
 
-            self.file_name = read_logs(self.reader, self.flag_temperatyre, self.flag_viborka, self.first_date,
-                                       self.second_date)
+            self.reader, self.settings = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
+                                                            self.port_number)
 
-            self._speeding_down_and_close()
+            init_connect(self.reader, self.settings)
+
+            read_logs(self.reader, self.flag_temperatyre, self.flag_viborka, self.first_date,
+                      self.second_date)
+
+            # self._speeding_down_and_close()
+            close_reader(self.reader)
 
         except Exception as e:
+            self.settings.media.close()
             print(f"Ошибка при считывании журналов >> {e}")
 
     def analysis(self):

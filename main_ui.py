@@ -29,6 +29,7 @@ class WorkerThread(QThread):
         except Exception as e:
             self.error.emit(str(e))
 
+
 class EmittingStream(QObject):
     textWritten = pyqtSignal(str)
 
@@ -170,21 +171,7 @@ class UiForLogLoader(QWidget):
 
     def analysis(self):
         try:
-            # file_name, device_type = self.file_name
-
-            # options = QFileDialog.Options()
-            # options |= QFileDialog.ReadOnly
-            # filename, _ = QFileDialog.getOpenFileName(
-            #     self,
-            #     "Выберите файл",
-            #     "",
-            #     "Все файлы (*);;Текстовые файлы (*.xlsx)",
-            #     options=options
-            # )
-            # if filename:
-            #     self.file_name = filename
-
-            file_name =  self.file_name
+            file_name = self.file_name
 
             current_log_analysis(file_name)
             self_diagnosis_log_analysis(file_name)
@@ -243,11 +230,12 @@ class UiForLogLoader(QWidget):
     def start_analysis_thread(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
+
         filename, _ = QFileDialog.getOpenFileName(
             self,
             "Выберите файл",
             "",
-            "Все файлы (*);;Текстовые файлы (*.xlsx)",
+            "Файлы Excel (*.xlsx)",
             options=options
         )
         if filename:

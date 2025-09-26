@@ -1,11 +1,12 @@
 import datetime
 from datetime import timedelta
+from time import sleep
 
 from dateutil.relativedelta import relativedelta
 from openpyxl.reader.excel import load_workbook
 from openpyxl.styles import PatternFill
 
-from libs.Utils import is_valid_date_for_anal
+from libs.Utils import is_valid_date_for_anal, parse_log_name
 
 pink_fill = PatternFill(start_color='FFCC99FF',
                         end_color='FFCC99FF',
@@ -45,7 +46,8 @@ def analysis_correct_date_ref(sheets, log_name):
             # Проверяем условие
             if not is_valid_date_for_anal(str(cell.value)):
                 cell.fill = pink_fill
-                print(f"Невалидная дата в строчке {cell.row} в '{log_name.replace(" ", "е ", 1)}'")
+                sleep(0.1)
+                print(f"Невалидная дата в строчке {cell.row} в '{parse_log_name(log_name)}'")
     except Exception as e:
         raise
 
@@ -78,11 +80,13 @@ def time_ordering_analysis_ref(sheets, log_name):
                 if ((datetime.datetime.strptime(str(cell_0.value), format_dt) -
                      datetime.datetime.strptime(str(cell_1.value), format_dt) > timedelta())):
                     cell_0.fill = pink_fill
+                    sleep(0.1)
                     cell_1.fill = pink_fill
+                    sleep(0.1)
 
                     print(
                         f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
-                        f" '{log_name.replace(" ", "е ", 1)}'")
+                        f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise
@@ -109,17 +113,26 @@ def ipu_working_hours_ref(sheets, log_name):
 
             # Получаем ячейку
             cell_1 = row[0]
-            res = int(cell_1.value) - int(cell_0.value)
-
-            # Проверяем условие
-            if res < 0:
-                cell_0.fill = pink_fill
+            if cell_1.value is None:
                 cell_1.fill = pink_fill
+                sleep(0.1)
+                print(f"Некорректный тип данных 'Время работы ПУ' в ячейке {cell_1.row} в"
+                      f" '{parse_log_name(log_name)}'")
+                continue
+            else:
+                res = int(cell_1.value) - int(cell_0.value)
 
-                print(f"Некорректная последовательность 'Время работы ПУ' в строчках {cell_0.row}-{cell_1.row} в"
-                      f" '{log_name.replace(" ", "е ", 1)}'")
+                # Проверяем условие
+                if res < 0:
+                    cell_0.fill = pink_fill
+                    sleep(0.1)
+                    cell_1.fill = pink_fill
+                    sleep(0.1)
 
-            cell_0 = row[0]
+                    print(f"Некорректная последовательность 'Время работы ПУ' в строчках {cell_0.row}-{cell_1.row} в"
+                          f" '{log_name.replace(" ", "е ", 1)}'")
+
+                cell_0 = row[0]
 
     except Exception as e:
         raise e
@@ -154,11 +167,13 @@ def time_ordering_analysis_for_daily_profile(sheets, log_name):
                 # Проверяем условие
                 if delta != timedelta(days=1):
                     cell_0.fill = pink_fill
+                    sleep(0.1)
                     cell_1.fill = pink_fill
+                    sleep(0.1)
 
                     print(
                         f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
-                        f" '{log_name.replace(" ", "е ", 1)}'")
+                        f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise
@@ -194,11 +209,13 @@ def time_ordering_analysis_for_month_profile(sheets, log_name):
                 # Проверяем условие
                 if not (delta.months == 1 and delta.days == 0):
                     cell_0.fill = pink_fill
+                    sleep(0.1)
                     cell_1.fill = pink_fill
+                    sleep(0.1)
 
                     print(
                         f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
-                        f" '{log_name.replace(" ", "е ", 1)}'")
+                        f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise

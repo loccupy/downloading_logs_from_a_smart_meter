@@ -1255,6 +1255,19 @@ def sample_config(flag, start, end):
         return ['N']
 
 
+def parse_log_name(log_name):
+    name = log_name.split()[0]
+    if name == 'Журнал':
+        new_log_name = log_name.replace(" ", "е ", 1)
+    elif name == 'Профиль':
+        new_log_name = log_name.replace("ь", "е", 1)
+    elif name == 'Срез':
+        new_log_name = log_name.replace(" ", "е ", 1)
+    else:
+        new_log_name = log_name.replace("ый", "ом", 1).replace("ь", "е", 1)
+    return new_log_name
+
+
 def range_by_date(reader, data, sample):
     if sample[0] not in ['N', 'n']:
         start = GXDateTime(f'{sample[0]} 00:00:00', "%d.%m.%Y %H:%M:%S")

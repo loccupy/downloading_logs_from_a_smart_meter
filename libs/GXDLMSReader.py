@@ -25,7 +25,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
         super().__init__()
         # pylint: disable=too-many-arguments
         self.replyBuff = bytearray(8 + 1024)
-        self.waitTime = 20000
+        self.waitTime = 25000
         self.logFile = open("../logFile.txt", "w")
         self.trace = trace
         self.media = media
@@ -298,7 +298,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
                     self.readDLMSPacket(it, reply)
                 self.client.parseApplicationAssociationResponse(reply.data)
                 self.setDeviceType()
-                print("<<Соединение установлено>>")
+                print("\n<<Соединение установлено>>")
             except GXDLMSException as ex:
                 # Invalid password.
                 raise GXDLMSException(AssociationResult.PERMANENT_REJECTED, SourceDiagnostic.AUTHENTICATION_FAILURE)

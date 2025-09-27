@@ -38,7 +38,7 @@ def get_reader(com, password, serial_number, baud):
 
 def get_reader_with_ip(ip, password, serial_number, port):
     settings = GXSettings()
-    settings.getParameters(ip, port, password='1234567898765432', authentication="High",
+    settings.getParameters(ip, port, password=password, authentication="High",
                            serverAddress=serial_number + 16,
                            logicalAddress=1, clientAddress=48, baudRate=9600)
     reader = GXDLMSReader(settings.client, settings.media,

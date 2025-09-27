@@ -2,21 +2,45 @@ from libs.Utils import *
 from libs.connect import *
 
 
-def read_logs(reader, flag_temperatyre, viborka, start, end):
+def read_type(config):
+    print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...\n")
+    reader_list = get_reader_with_ip(config.ip_meter, config.passw, config.serial_number, config.port_number)
+    reader = reader_list[0]
+    settings = reader_list[1]
     try:
-        sample = sample_config(viborka, start, end)
+        init_connect(reader, settings)
         device_type = reader.deviceType
-
-        print("\nСтарт считывания журналов...\n")
         serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
+        print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
+        close_reader(reader)
         time = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
         file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
         excel_writer = pd.ExcelWriter(file_name)
+        return device_type, excel_writer, file_name
+    except Exception as e:
+        close_reader(reader)
+        print(f'Ошибка при считывании типа счетчика и формировании стартового excel файла >> {e} ')
+        raise
+
+
+def read_logs(config):
+    try:
+        print("\nСтарт считывания журналов...\n")
+        sample = sample_config(config.flag_viborka, config.first_date, config.second_date)
+        # device_type = reader.deviceType
+        # serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
+        # time = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
+        # file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
+        # excel_writer = pd.ExcelWriter(file_name)
+
+        device_type, excel_writer, file_name = read_type(config)
+
+        reader = config
 
         create_sheet_in_excel_file(unloading_currents_log, excel_writer, 'Журнал токов', reader, sample)
         create_sheet_in_excel_file(unloading_the_voltage_log, excel_writer, 'Журнал напряжения', reader, sample)
         create_sheet_in_excel_file(unloading_power_log, excel_writer, 'Журнал мощности', reader, sample)
-        if flag_temperatyre:
+        if config.flag_viborka:
             create_sheet_in_excel_file(unloading_temperature_log, excel_writer, 'Журнал температуры', reader, sample)
         create_sheet_in_excel_file(unloading_self_diagnosis_log, excel_writer, 'Журнал самодиагностики', reader, sample)
         create_sheet_in_excel_file(unloading_network_quality_log, excel_writer, 'Журнал качества сети', reader, sample)

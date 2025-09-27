@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QFileDialog
 
+from libs.config import Config
 from libs.connect import get_reader, speeding_up_the_connection, init_connect, \
     close_reader, setting_the_speed_to_default_values, connect_with_ip, get_reader_with_ip
 from libs.log_analysis_main import *
@@ -116,6 +117,7 @@ class UiForLogLoader(QWidget):
 
     def get_params(self):
         try:
+
             self.ip_meter = self.ip.text()
             self.port_number = str(self.port.text())
             self.serial_number = int(self.serial.text())
@@ -126,6 +128,9 @@ class UiForLogLoader(QWidget):
             self.flag_viborka = self.checkbox_viborka.isChecked()
             self.first_date = self.start_date.text()
             self.second_date = self.end_date.text()
+            config = Config(self.ip_meter, self.port_number, self.serial_number,self.passw, self.flag_temperatyre,
+                            self.flag_viborka, self.first_date, self.second_date)
+            return config
         except Exception as e:
             print(f"Ошибка при считывании данных из полей >> {e}")
             raise
@@ -162,21 +167,19 @@ class UiForLogLoader(QWidget):
     def read_log(self):
         try:
             # self._speeding_up()
-            self.get_params()
+            config = self.get_params()
 
-            self.reader, self.settings = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
-                                                            self.port_number)
+            # self.reader = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
+            #                                                 self.port_number)
+            #
+            # init_connect(self.reader, self.settings)
 
-            init_connect(self.reader, self.settings)
-
-            read_logs(self.reader, self.flag_temperatyre, self.flag_viborka, self.first_date,
-                      self.second_date)
+            read_logs(config)
 
             # self._speeding_down_and_close()
-            close_reader(self.reader)
+            # close_reader(self.reader)
 
         except Exception as e:
-            self.settings.media.close()
             print(f"Ошибка при считывании журналов >> {e}")
 
     def analysis(self):

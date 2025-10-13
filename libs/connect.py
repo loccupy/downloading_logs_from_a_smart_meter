@@ -47,8 +47,18 @@ def get_reader_with_ip(ip, password, serial_number, port):
     return reader, settings
 
 
-def speeding_up_the_connection(reader):
+def speeding_up_the_connection(config):
+    reader_list = get_reader(
+        config.com_meter,
+        config.passw,
+        config.serial_number,
+        config.baud
+    )
+    reader = reader_list[0]
+    settings = reader_list[1]
     try:
+        init_connect(reader, settings)
+
         # Определение типа интерфейса
         data = GXDLMSData('0.0.96.12.4.255')
         val = reader.read(data, 2)
@@ -66,6 +76,7 @@ def speeding_up_the_connection(reader):
                 speed.communicationSpeed = 9
                 print("Ускоряем RS до 115200")
                 reader.write(speed, 2)
+                config.baud = 115200
         else:
             speed = GXDLMSHdlcSetup('0.0.22.0.0.255')
             old_speed = reader.read(speed, 2)
@@ -73,6 +84,7 @@ def speeding_up_the_connection(reader):
                 speed.communicationSpeed = 6
                 print("Ускоряем ОПТОПОРТ до 19200")
                 reader.write(speed, 2)
+                config.baud = 19200
 
         new_speed = reader.read(speed, 2)
         # reader.close()
@@ -84,14 +96,26 @@ def speeding_up_the_connection(reader):
             print(f"Скорость для нового соединения по RS >> {baud}")
         else:
             print(f"Скорость для нового соединения по ОПТОПОРТу >> {baud}")
+
+        close_reader(reader)
         return baud
     except Exception as e:
         # print(f"Ошибка при ускорении соединения: {e}")
         raise
 
 
-def setting_the_speed_to_default_values(reader):
+def setting_the_speed_to_default_values(config):
+    reader_list = get_reader(
+        config.com_meter,
+        config.passw,
+        config.serial_number,
+        config.baud
+    )
+    reader = reader_list[0]
+    settings = reader_list[1]
     try:
+        init_connect(reader, settings)
+
         # Определение типа интерфейса
         data = GXDLMSData('0.0.96.12.4.255')
         val = reader.read(data, 2)
@@ -103,6 +127,7 @@ def setting_the_speed_to_default_values(reader):
                 speed.communicationSpeed = 5
                 print("Устанавливаем скорость соединения на RS на 9600...")
                 reader.write(speed, 2)
+                config.baud = 9600
         else:
             speed = GXDLMSHdlcSetup('0.0.22.0.0.255')
             old_speed = reader.read(speed, 2)
@@ -110,8 +135,10 @@ def setting_the_speed_to_default_values(reader):
                 speed.communicationSpeed = 5
                 print("Устанавливаем скорость соединения ОПТОПОРТа на 9600...")
                 reader.write(speed, 2)
-
+                config.baud = 9600
+        close_reader(reader)
     except Exception as e:
+        close_reader(reader)
         # print(f"Не удалось установить скорость на дефолтные значения c ошибкой {e.args}")
         raise
 

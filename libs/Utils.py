@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from libs.connect import init_connect, close_reader, get_reader_with_ip
+from libs.connect import init_connect, close_reader, get_reader_with_ip, get_reader
 from libs.gurux.dlms import GXDateTime
 from libs.gurux.dlms.objects import GXDLMSProfileGeneric
 
@@ -1243,11 +1243,11 @@ EventAccessCode = [(1, "Попытка несанкционированного 
 
 
 def create_sheet_in_excel_file(data, writer, sheet_name, config, sample, attempt=1, max_attempts=3):
-    reader_list = get_reader_with_ip(
-        config.ip_meter,
+    reader_list = get_reader(
+        config.com_meter,
         config.passw,
         config.serial_number,
-        config.port_number
+        config.baud
     )
     reader = reader_list[0]
     settings = reader_list[1]

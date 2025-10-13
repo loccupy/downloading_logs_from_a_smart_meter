@@ -4,7 +4,7 @@ from libs.connect import *
 
 def read_type(config):
     print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...\n")
-    reader_list = get_reader_with_ip(config.ip_meter, config.passw, config.serial_number, config.port_number)
+    reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
     reader = reader_list[0]
     settings = reader_list[1]
     try:

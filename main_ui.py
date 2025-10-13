@@ -65,17 +65,17 @@ class UiForLogLoader(QWidget):
 
         uic.loadUi(ui_path, self)
 
-        self.port = self.findChild(QtWidgets.QLineEdit, 'port')
-        self.port.setValidator(QIntValidator())
-        self.port.setMaxLength(5)
+        # self.port = self.findChild(QtWidgets.QLineEdit, 'port')
+        # self.port.setValidator(QIntValidator())
+        # self.port.setMaxLength(5)
 
         self.serial = self.findChild(QtWidgets.QLineEdit, 'serial')
         self.serial.setValidator(QIntValidator())
         self.serial.setMaxLength(4)
 
-        self.ip = self.findChild(QtWidgets.QLineEdit, 'ip')
+        self.com = self.findChild(QtWidgets.QLineEdit, 'com')
         # self.ip.setValidator(QIntValidator())
-        self.ip.setMaxLength(15)
+        self.com.setMaxLength(2)
 
         self.field_password = self.findChild(QtWidgets.QLineEdit, 'field_password')
         self.field_password.setEnabled(False)
@@ -118,8 +118,8 @@ class UiForLogLoader(QWidget):
     def get_params(self):
         try:
 
-            self.ip_meter = self.ip.text()
-            self.port_number = str(self.port.text())
+            self.com_meter = self.com.text()
+            # self.port_number = str(self.port.text())
             self.serial_number = int(self.serial.text())
             self.passw = self.field_password.text()
             if self.password.isChecked() is False:
@@ -128,7 +128,7 @@ class UiForLogLoader(QWidget):
             self.flag_viborka = self.checkbox_viborka.isChecked()
             self.first_date = self.start_date.text()
             self.second_date = self.end_date.text()
-            config = Config(self.ip_meter, self.port_number, self.serial_number,self.passw, self.flag_temperatyre,
+            config = Config(self.com_meter, self.serial_number, self.passw, self.flag_temperatyre,
                             self.flag_viborka, self.first_date, self.second_date)
             return config
         except Exception as e:
@@ -174,9 +174,12 @@ class UiForLogLoader(QWidget):
             #
             # init_connect(self.reader, self.settings)
 
+            speeding_up_the_connection(config)
+
             read_logs(config)
 
-            # self._speeding_down_and_close()
+            setting_the_speed_to_default_values(config)
+
             # close_reader(self.reader)
 
         except Exception as e:
@@ -215,7 +218,7 @@ class UiForLogLoader(QWidget):
 
     def start_read_log_thread(self):
         try:
-            if not self.ip.text().strip():
+            if not self.com.text().strip():
                 raise ValueError("Поле IP адреса не может быть пустым")
             # if not self.baud.text().strip():
             #     raise ValueError("Поле скорости соединения не может быть пустым")

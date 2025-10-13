@@ -43,7 +43,7 @@
    <property name="title">
     <string>Настройки подключения</string>
    </property>
-   <widget class="QLineEdit" name="ip">
+   <widget class="QLineEdit" name="com">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -65,7 +65,7 @@
      <bool>false</bool>
     </property>
     <property name="placeholderText">
-     <string>Введите ip</string>
+     <string>Введите com port</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="serial">
@@ -129,31 +129,6 @@
     </property>
     <property name="text">
      <string>Пароль не дефолтный</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="port">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>60</y>
-      <width>471</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-    <property name="dragEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="readOnly">
-     <bool>false</bool>
-    </property>
-    <property name="placeholderText">
-     <string>Введите port</string>
     </property>
    </widget>
   </widget>

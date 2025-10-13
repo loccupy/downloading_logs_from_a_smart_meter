@@ -25,7 +25,7 @@ def read_type(config):
 
 def read_logs(config):
     try:
-        print("\nСтарт считывания журналов...\n")
+        print(f"\nСтарт считывания журналов счетчика №..{config.serial_number}...\n")
         sample = sample_config(config.flag_viborka, config.first_date, config.second_date)
         # device_type = reader.deviceType
         # serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')

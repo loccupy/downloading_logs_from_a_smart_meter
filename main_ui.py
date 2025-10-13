@@ -58,6 +58,7 @@ class UiForLogLoader(QWidget):
         self.object_connect = None
         self.thread = None
         self.file_name = None
+        self.file_names = []
 
     def initUI(self):
         current_dir = os.path.dirname(__file__)
@@ -70,8 +71,8 @@ class UiForLogLoader(QWidget):
         # self.port.setMaxLength(5)
 
         self.serial = self.findChild(QtWidgets.QLineEdit, 'serial')
-        self.serial.setValidator(QIntValidator())
-        self.serial.setMaxLength(4)
+        # self.serial.setValidator(QIntValidator())
+        # self.serial.setMaxLength(4)
 
         self.com = self.findChild(QtWidgets.QLineEdit, 'com')
         # self.ip.setValidator(QIntValidator())
@@ -115,12 +116,11 @@ class UiForLogLoader(QWidget):
         self.read.clicked.connect(self.start_read_log_thread)
         self.analisys.clicked.connect(self.start_analysis_thread)
 
-    def get_params(self):
+    def get_params(self, serial):
         try:
-
             self.com_meter = self.com.text()
             # self.port_number = str(self.port.text())
-            self.serial_number = int(self.serial.text())
+            self.serial_number = int(serial)
             self.passw = self.field_password.text()
             if self.password.isChecked() is False:
                 self.passw = '1234567898765432'
@@ -135,91 +135,70 @@ class UiForLogLoader(QWidget):
             print(f"Ошибка при считывании данных из полей >> {e}")
             raise
 
-    # def _speeding_up(self):
-    #     try:
-    #         self.get_params()
-    #
-    #         self.reader, self.settings = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
-    #                                                         self.baud_rate)
-    #         #
-    #         # init_connect(self.reader, self.settings)
-    #         # new_baud = speeding_up_the_connection(self.reader)
-    #         # print('Переподключение с новой скоростью....')
-    #         # close_reader(self.reader)
-    #         #
-    #         # self.reader, self.settings = get_reader_with_ip(self.com_port, self.passw, self.serial_number, new_baud)
-    #
-    #         init_connect(self.reader, self.settings)
-    #     except Exception as e:
-    #         self.settings.media.close()
-    #         raise
-    #
-    # def _speeding_down_and_close(self):
-    #     try:
-    #         # init_connect(self.reader, self.settings)
-    #         # setting_the_speed_to_default_values(self.reader)
-    #         close_reader(self.reader)
-    #     except Exception as e:
-    #         self.settings.media.close()
-    #         print(f"Ошибка при установке соединения на дефолтные 9600 >> {e}.")
-    #         raise
+    def get_list_of_serial_numbers(self):
+        list_of_serial = [i.strip() for i in self.serial.text().split(',')]
+        return list_of_serial
 
     def read_log(self):
         try:
-            # self._speeding_up()
-            config = self.get_params()
+            list_of_serial = self.get_list_of_serial_numbers()
+            for serial in list_of_serial:
+                config = self.get_params(serial)
 
-            # self.reader = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
-            #                                                 self.port_number)
-            #
-            # init_connect(self.reader, self.settings)
+                speeding_up_the_connection(config)
 
-            speeding_up_the_connection(config)
+                file_name, device_type = read_logs(config)
 
-            read_logs(config)
+                setting_the_speed_to_default_values(config)
 
-            setting_the_speed_to_default_values(config)
+                self.file_names.append([file_name, device_type])
+                print(self.file_names)
 
-            # close_reader(self.reader)
+                self.analysis()
 
         except Exception as e:
             print(f"Ошибка при считывании журналов >> {e}")
 
     def analysis(self):
-        try:
-            file_name = self.file_name
+        for file_name in self.file_names:
+            try:
+                old_file_name = file_name[0]
+                file_name = old_file_name.replace('.xlsx', '_анализ.xlsx')
 
-            current_log_analysis(file_name)
-            self_diagnosis_log_analysis(file_name)
-            network_quality_log_analysis(file_name)
-            voltage_log_analysis(file_name)
-            communication_events_log_analysis(file_name)
-            access_control_log_analysis(file_name)
-            data_correction_log_analysis(file_name)
-            time_correction_log_analysis(file_name)
-            battery_charge_status_log_analysis(file_name)
-            power_log_analysis(file_name)
-            tangent_excess_log_analysis(file_name)
-            tangent_output_log_analysis(file_name)
-            network_quality_for_period_log_analysis(file_name)
-            on_and_off_log_analysis(file_name)
-            external_influences_log_analysis(file_name)
-            if 'TT' in self.file_name:
-                sampling_status_log_analysis(file_name)
-            daily_profile_log_analysis(file_name)
-            month_profile_log_analysis(file_name)
-            energy_profile_for_1_log_analysis(file_name)
-            energy_profile_for_2_log_analysis(file_name)
-            artur_profile_log_analysis(file_name)
+                sheets = load_workbook(old_file_name)
+                sheets.save(file_name)
 
-            print("АНАЛИЗ ЖУРНАЛОВ ЗАВЕРШЕН")
-        except Exception as e:
-            print(f"Ошибка при анализе {e}")
+                current_log_analysis(file_name)
+                self_diagnosis_log_analysis(file_name)
+                network_quality_log_analysis(file_name)
+                voltage_log_analysis(file_name)
+                communication_events_log_analysis(file_name)
+                access_control_log_analysis(file_name)
+                data_correction_log_analysis(file_name)
+                time_correction_log_analysis(file_name)
+                battery_charge_status_log_analysis(file_name)
+                power_log_analysis(file_name)
+                tangent_excess_log_analysis(file_name)
+                tangent_output_log_analysis(file_name)
+                network_quality_for_period_log_analysis(file_name)
+                on_and_off_log_analysis(file_name)
+                external_influences_log_analysis(file_name)
+                if 'TT' == file_name[1]:
+                    sampling_status_log_analysis(file_name)
+                daily_profile_log_analysis(file_name)
+                month_profile_log_analysis(file_name)
+                energy_profile_for_1_log_analysis(file_name)
+                energy_profile_for_2_log_analysis(file_name)
+                artur_profile_log_analysis(file_name)
+
+                print("АНАЛИЗ ЖУРНАЛОВ ЗАВЕРШЕН")
+            except Exception as e:
+                print(f"Ошибка при анализе {e}")
 
     def start_read_log_thread(self):
         try:
             if not self.com.text().strip():
-                raise ValueError("Поле IP адреса не может быть пустым")
+                raise ValueError("Поле COM не может быть пустым")
             # if not self.baud.text().strip():
             #     raise ValueError("Поле скорости соединения не может быть пустым")
             if not self.serial.text().strip():
@@ -244,20 +223,20 @@ class UiForLogLoader(QWidget):
         self.thread.start()
 
     def start_analysis_thread(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.ReadOnly
-
-        filename, _ = QFileDialog.getOpenFileName(
-            self,
-            "Выберите файл",
-            "",
-            "Файлы Excel (*.xlsx)",
-            options=options
-        )
-        if filename:
-            self.file_name = filename
-        if self.thread and self.thread.isRunning():
-            return
+        # options = QFileDialog.Options()
+        # options |= QFileDialog.ReadOnly
+        #
+        # filename, _ = QFileDialog.getOpenFileName(
+        #     self,
+        #     "Выберите файл",
+        #     "",
+        #     "Файлы Excel (*.xlsx)",
+        #     options=options
+        # )
+        # if filename:
+        #     self.file_name = filename
+        # if self.thread and self.thread.isRunning():
+        #     return
 
         self.analisys.setEnabled(False)
         self.read.setEnabled(False)

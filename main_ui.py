@@ -59,7 +59,7 @@ class UiForLogLoader(QWidget):
 
     def initUI(self):
         current_dir = os.path.dirname(__file__)
-        ui_path = os.path.join(current_dir, 'libs', 'maket.ui')
+        ui_path = os.path.join(current_dir, 'libs', 'maket_mass.ui')
 
         uic.loadUi(ui_path, self)
 

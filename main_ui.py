@@ -6,8 +6,9 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QFileDialog
 
+from libs.config import Config
 from libs.connect import get_reader, speeding_up_the_connection, init_connect, \
-    close_reader, setting_the_speed_to_default_values
+    close_reader, setting_the_speed_to_default_values, connect_with_ip, get_reader_with_ip
 from libs.log_analysis_main import *
 from libs.read import read_logs
 
@@ -43,6 +44,7 @@ class EmittingStream(QObject):
 class UiForLogLoader(QWidget):
     def __init__(self):
         super().__init__()
+        self.ip = None
         self.second_date = None
         self.first_date = None
         self.flag_viborka = None
@@ -59,21 +61,21 @@ class UiForLogLoader(QWidget):
 
     def initUI(self):
         current_dir = os.path.dirname(__file__)
-        ui_path = os.path.join(current_dir, 'libs', 'maket_mass.ui')
+        ui_path = os.path.join(current_dir, 'libs', 'maket.ui')
 
         uic.loadUi(ui_path, self)
 
-        self.baud = self.findChild(QtWidgets.QLineEdit, 'speed')
-        self.baud.setValidator(QIntValidator())
-        self.baud.setMaxLength(6)
+        self.port = self.findChild(QtWidgets.QLineEdit, 'port')
+        self.port.setValidator(QIntValidator())
+        self.port.setMaxLength(5)
 
         self.serial = self.findChild(QtWidgets.QLineEdit, 'serial')
         self.serial.setValidator(QIntValidator())
         self.serial.setMaxLength(4)
 
-        self.com = self.findChild(QtWidgets.QLineEdit, 'com')
-        self.com.setValidator(QIntValidator())
-        self.com.setMaxLength(2)
+        self.ip = self.findChild(QtWidgets.QLineEdit, 'ip')
+        # self.ip.setValidator(QIntValidator())
+        self.ip.setMaxLength(15)
 
         self.field_password = self.findChild(QtWidgets.QLineEdit, 'field_password')
         self.field_password.setEnabled(False)
@@ -115,8 +117,9 @@ class UiForLogLoader(QWidget):
 
     def get_params(self):
         try:
-            self.com_port = int(self.com.text())
-            self.baud_rate = int(self.baud.text())
+
+            self.ip_meter = self.ip.text()
+            self.port_number = str(self.port.text())
             self.serial_number = int(self.serial.text())
             self.passw = self.field_password.text()
             if self.password.isChecked() is False:
@@ -125,46 +128,56 @@ class UiForLogLoader(QWidget):
             self.flag_viborka = self.checkbox_viborka.isChecked()
             self.first_date = self.start_date.text()
             self.second_date = self.end_date.text()
+            config = Config(self.ip_meter, self.port_number, self.serial_number,self.passw, self.flag_temperatyre,
+                            self.flag_viborka, self.first_date, self.second_date)
+            return config
         except Exception as e:
             print(f"Ошибка при считывании данных из полей >> {e}")
             raise
 
-    def _speeding_up(self):
-        try:
-            self.get_params()
-
-            self.reader, self.settings = get_reader(self.com_port, self.passw, self.serial_number, self.baud_rate)
-
-            init_connect(self.reader, self.settings)
-            new_baud = speeding_up_the_connection(self.reader)
-            print('Переподключение с новой скоростью....')
-            close_reader(self.reader)
-
-            self.reader, self.settings = get_reader(self.com_port, self.passw, self.serial_number, new_baud)
-
-            init_connect(self.reader, self.settings)
-        except Exception as e:
-            self.settings.media.close()
-            raise
-
-    def _speeding_down_and_close(self):
-        try:
-            # init_connect(self.reader, self.settings)
-            setting_the_speed_to_default_values(self.reader)
-            close_reader(self.reader)
-        except Exception as e:
-            self.settings.media.close()
-            print(f"Ошибка при установке соединения на дефолтные 9600 >> {e}.")
-            raise
+    # def _speeding_up(self):
+    #     try:
+    #         self.get_params()
+    #
+    #         self.reader, self.settings = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
+    #                                                         self.baud_rate)
+    #         #
+    #         # init_connect(self.reader, self.settings)
+    #         # new_baud = speeding_up_the_connection(self.reader)
+    #         # print('Переподключение с новой скоростью....')
+    #         # close_reader(self.reader)
+    #         #
+    #         # self.reader, self.settings = get_reader_with_ip(self.com_port, self.passw, self.serial_number, new_baud)
+    #
+    #         init_connect(self.reader, self.settings)
+    #     except Exception as e:
+    #         self.settings.media.close()
+    #         raise
+    #
+    # def _speeding_down_and_close(self):
+    #     try:
+    #         # init_connect(self.reader, self.settings)
+    #         # setting_the_speed_to_default_values(self.reader)
+    #         close_reader(self.reader)
+    #     except Exception as e:
+    #         self.settings.media.close()
+    #         print(f"Ошибка при установке соединения на дефолтные 9600 >> {e}.")
+    #         raise
 
     def read_log(self):
         try:
-            self._speeding_up()
+            # self._speeding_up()
+            config = self.get_params()
 
-            self.file_name = read_logs(self.reader, self.flag_temperatyre, self.flag_viborka, self.first_date,
-                                       self.second_date)
+            # self.reader = get_reader_with_ip(self.ip_meter, self.passw, self.serial_number,
+            #                                                 self.port_number)
+            #
+            # init_connect(self.reader, self.settings)
 
-            self._speeding_down_and_close()
+            read_logs(config)
+
+            # self._speeding_down_and_close()
+            # close_reader(self.reader)
 
         except Exception as e:
             print(f"Ошибка при считывании журналов >> {e}")
@@ -202,10 +215,10 @@ class UiForLogLoader(QWidget):
 
     def start_read_log_thread(self):
         try:
-            if not self.com.text().strip():
-                raise ValueError("Поле COM-порта не может быть пустым")
-            if not self.baud.text().strip():
-                raise ValueError("Поле скорости соединения не может быть пустым")
+            if not self.ip.text().strip():
+                raise ValueError("Поле IP адреса не может быть пустым")
+            # if not self.baud.text().strip():
+            #     raise ValueError("Поле скорости соединения не может быть пустым")
             if not self.serial.text().strip():
                 raise ValueError("Поле серийного номера не может быть пустым")
             if not self.field_password.text().strip() and self.password.isChecked() is True:
@@ -341,14 +354,14 @@ def start_ui():
 
 
 def debug():
-    file_name = "Serial_240101000000000_30.07.25_12.36.41.xlsx"
+    # file_name = "Serial_240101000000000_30.07.25_12.36.41.xlsx"
     # current_log_analysis(file_name)
     # self_diagnosis_log_analysis(file_name)
     # network_quality_log_analysis(file_name)
     # voltage_log_analysis(file_name)
     # communication_events_log_analysis(file_name)
     # access_control_log_analysis(file_name)
-    data_correction_log_analysis(file_name)
+    # data_correction_log_analysis(file_name)
     # time_correction_log_analysis(file_name)
     # battery_charge_status_log_analysis(file_name)
     # power_log_analysis(file_name)
@@ -363,6 +376,9 @@ def debug():
     # energy_profile_for_1_log_analysis(file_name)
     # energy_profile_for_2_log_analysis(file_name)
     # artur_profile_log_analysis(file_name)
+    reader = connect_with_ip()
+    print(reader.deviceType)
+    reader.close()
 
 
 if __name__ == "__main__":

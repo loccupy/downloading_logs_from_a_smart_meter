@@ -3,6 +3,17 @@ from libs.GXDLMSReader import GXDLMSReader
 from libs.GXSettings import GXSettings
 
 
+def connect_with_ip():
+    settings = GXSettings()
+    settings.getParameters("85.141.70.251", "6603", password='1234567898765432', authentication="High",
+                           serverAddress=18,
+                           logicalAddress=1, clientAddress=48, baudRate=9600)
+    settings.media.open()
+    reader = GXDLMSReader(settings.client, settings.media, settings.trace, settings.invocationCounter)
+    reader.initializeConnection()
+    return reader
+
+
 def connect():
     settings = GXSettings()
     settings.getParameters("COM", f"COM11", password='1234567898765432', authentication="High",
@@ -19,6 +30,17 @@ def get_reader(com, password, serial_number, baud):
     settings.getParameters("COM", f"COM{com}", password=password,
                            authentication="High", serverAddress=serial_number + 16,
                            logicalAddress=1, clientAddress=48, baudRate=baud)
+    reader = GXDLMSReader(settings.client, settings.media,
+                          settings.trace, settings.invocationCounter)
+
+    return reader, settings
+
+
+def get_reader_with_ip(ip, password, serial_number, port):
+    settings = GXSettings()
+    settings.getParameters(ip, port, password=password, authentication="High",
+                           serverAddress=serial_number + 16,
+                           logicalAddress=1, clientAddress=48, baudRate=9600)
     reader = GXDLMSReader(settings.client, settings.media,
                           settings.trace, settings.invocationCounter)
 

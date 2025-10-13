@@ -147,12 +147,10 @@ class UiForLogLoader(QWidget):
 
                 speeding_up_the_connection(config)
 
-                file_name, device_type = read_logs(config)
+                self.file_name = read_logs(config)
+                print(self.file_name)
 
                 setting_the_speed_to_default_values(config)
-
-                self.file_names.append([file_name, device_type])
-                print(self.file_names)
 
                 self.analysis()
 
@@ -160,40 +158,41 @@ class UiForLogLoader(QWidget):
             print(f"Ошибка при считывании журналов >> {e}")
 
     def analysis(self):
-        for file_name in self.file_names:
-            try:
-                old_file_name = file_name[0]
-                file_name = old_file_name.replace('.xlsx', '_анализ.xlsx')
 
-                sheets = load_workbook(old_file_name)
-                sheets.save(file_name)
+        try:
+            old_file_name = self.file_name[0]
+            device_type = self.file_name[1]
+            file_name = old_file_name.replace('.xlsx', '_анализ.xlsx')
 
-                current_log_analysis(file_name)
-                self_diagnosis_log_analysis(file_name)
-                network_quality_log_analysis(file_name)
-                voltage_log_analysis(file_name)
-                communication_events_log_analysis(file_name)
-                access_control_log_analysis(file_name)
-                data_correction_log_analysis(file_name)
-                time_correction_log_analysis(file_name)
-                battery_charge_status_log_analysis(file_name)
-                power_log_analysis(file_name)
-                tangent_excess_log_analysis(file_name)
-                tangent_output_log_analysis(file_name)
-                network_quality_for_period_log_analysis(file_name)
-                on_and_off_log_analysis(file_name)
-                external_influences_log_analysis(file_name)
-                if 'TT' == file_name[1]:
-                    sampling_status_log_analysis(file_name)
-                daily_profile_log_analysis(file_name)
-                month_profile_log_analysis(file_name)
-                energy_profile_for_1_log_analysis(file_name)
-                energy_profile_for_2_log_analysis(file_name)
-                artur_profile_log_analysis(file_name)
+            sheets = load_workbook(old_file_name)
+            sheets.save(file_name)
 
-                print("АНАЛИЗ ЖУРНАЛОВ ЗАВЕРШЕН")
-            except Exception as e:
-                print(f"Ошибка при анализе {e}")
+            current_log_analysis(file_name)
+            self_diagnosis_log_analysis(file_name)
+            network_quality_log_analysis(file_name)
+            voltage_log_analysis(file_name)
+            communication_events_log_analysis(file_name)
+            access_control_log_analysis(file_name)
+            data_correction_log_analysis(file_name)
+            time_correction_log_analysis(file_name)
+            battery_charge_status_log_analysis(file_name)
+            power_log_analysis(file_name)
+            tangent_excess_log_analysis(file_name)
+            tangent_output_log_analysis(file_name)
+            network_quality_for_period_log_analysis(file_name)
+            on_and_off_log_analysis(file_name)
+            external_influences_log_analysis(file_name)
+            if 'TT' == device_type:
+                sampling_status_log_analysis(file_name)
+            daily_profile_log_analysis(file_name)
+            month_profile_log_analysis(file_name)
+            energy_profile_for_1_log_analysis(file_name)
+            energy_profile_for_2_log_analysis(file_name)
+            artur_profile_log_analysis(file_name)
+
+            print("АНАЛИЗ ЖУРНАЛОВ ЗАВЕРШЕН")
+        except Exception as e:
+            print(f"Ошибка при анализе {e}")
 
     def start_read_log_thread(self):
         try:

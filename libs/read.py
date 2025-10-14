@@ -1,8 +1,10 @@
+from time import sleep
+
 from libs.Utils import *
 from libs.connect import *
 
 
-def read_type(config):
+def read_type(config, attempt=1, max_attempts=5):
     print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...\n")
     reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
     reader = reader_list[0]
@@ -19,8 +21,23 @@ def read_type(config):
         return device_type, excel_writer, file_name
     except Exception as e:
         close_reader(reader)
-        print(f'Ошибка при считывании типа счетчика и формировании стартового excel файла >> {e} ')
-        raise
+        # print(f'Ошибка при считывании типа счетчика и формировании стартового excel файла >> {e} ')
+        # raise
+        # close_reader(reader)
+        # print(f"Не удалось установить скорость на дефолтные значения c ошибкой {e.args}")
+        # raise
+        if attempt < max_attempts:
+            print(f"Попытка подключения при считывании типа счетчика {attempt} из {max_attempts} не удалась: {e}")
+            print(f"Повторяем попытку через 2 секунды...")
+            sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            return read_type(
+                config,
+                attempt + 1,
+                max_attempts
+            )
+        else:
+            print(f"Превышено количество попыток подключения при считывании типа счетчика (5). Ошибка: {e}")
+            raise
 
 
 def read_logs(config):

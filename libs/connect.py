@@ -1,3 +1,5 @@
+import time
+
 from libs.gurux.dlms.objects import GXDLMSData, GXDLMSHdlcSetup
 from libs.GXDLMSReader import GXDLMSReader
 from libs.GXSettings import GXSettings
@@ -47,7 +49,7 @@ def get_reader_with_ip(ip, password, serial_number, port):
     return reader, settings
 
 
-def speeding_up_the_connection(config):
+def speeding_up_the_connection(config, attempt=1, max_attempts=5):
     reader_list = get_reader(
         config.com_meter,
         config.passw,
@@ -101,10 +103,24 @@ def speeding_up_the_connection(config):
         return baud
     except Exception as e:
         # print(f"Ошибка при ускорении соединения: {e}")
-        raise
+        # raise
+        close_reader(reader)
+        if attempt < max_attempts:
+            print(f"Попытка подключения для ускорения {attempt} из {max_attempts} не удалась: {e}")
+            print(f"Повторяем попытку через 2 секунды...")
+            time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            return speeding_up_the_connection(
+                config,
+                attempt + 1,
+                max_attempts
+            )
+        else:
+            print(f"Превышено количество попыток подключения для ускорения (5). Ошибка: {e}")
+            return None
+            # raise  # Перебрасываем исключение после всех попыток
 
 
-def setting_the_speed_to_default_values(config):
+def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
     reader_list = get_reader(
         config.com_meter,
         config.passw,
@@ -137,10 +153,23 @@ def setting_the_speed_to_default_values(config):
                 reader.write(speed, 2)
                 config.baud = 9600
         close_reader(reader)
+        return None
     except Exception as e:
         close_reader(reader)
         # print(f"Не удалось установить скорость на дефолтные значения c ошибкой {e.args}")
-        raise
+        # raise
+        if attempt < max_attempts:
+            print(f"Попытка подключения для сброса скорости {attempt} из {max_attempts} не удалась: {e}")
+            print(f"Повторяем попытку через 2 секунды...")
+            time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            return setting_the_speed_to_default_values(
+                config,
+                attempt + 1,
+                max_attempts
+            )
+        else:
+            print(f"Превышено количество попыток подключения для сброса скорости (5). Ошибка: {e}")
+            return None
 
 
 def init_connect(reader, settings):
@@ -150,7 +179,7 @@ def init_connect(reader, settings):
 
         reader.initializeConnection()
     except Exception as e:
-        settings.media.close()
+        reader.close()
         # print(f"Ошибка при открытии соединения: {e}")
         raise
 

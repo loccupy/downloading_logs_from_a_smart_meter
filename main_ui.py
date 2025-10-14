@@ -136,26 +136,30 @@ class UiForLogLoader(QWidget):
             raise
 
     def get_list_of_serial_numbers(self):
-        list_of_serial = [i.strip() for i in self.serial.text().split(',')]
-        return list_of_serial
+        try:
+            list_of_serial = [i.strip() for i in self.serial.text().split(',')]
+            return list_of_serial
+        except Exception as e:
+            print(f"Не удалось идентифицировать введенные серийные номера с ошибкой {e}!!!")
+            return []
 
     def read_log(self):
-        try:
-            list_of_serial = self.get_list_of_serial_numbers()
-            for serial in list_of_serial:
+        list_of_serial = self.get_list_of_serial_numbers()
+        for serial in list_of_serial:
+            try:
                 config = self.get_params(serial)
 
                 speeding_up_the_connection(config)
 
                 self.file_name = read_logs(config)
-                print(self.file_name)
 
                 setting_the_speed_to_default_values(config)
 
                 self.analysis()
 
-        except Exception as e:
-            print(f"Ошибка при считывании журналов >> {e}")
+            except Exception as e:
+                print(f"Ошибка при считывании журналов счетчика №...{serial} >> ошибка {e}")
+                continue
 
     def analysis(self):
 

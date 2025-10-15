@@ -1,6 +1,8 @@
 import os
 import sys
+from copy import copy
 
+import pandas as pd
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
@@ -11,6 +13,7 @@ from libs.connect import get_reader, speeding_up_the_connection, init_connect, \
     close_reader, setting_the_speed_to_default_values, connect_with_ip, get_reader_with_ip
 from libs.log_analysis_main import *
 from libs.read import read_logs
+from libs.sending_message import clear_global_list, global_list, message_in_out
 
 
 class WorkerThread(QThread):
@@ -145,21 +148,39 @@ class UiForLogLoader(QWidget):
 
     def read_log(self):
         list_of_serial = self.get_list_of_serial_numbers()
+        for_report = []
+        with open('report.txt', 'w', encoding='utf-8') as f:
+            f.write('')
         for serial in list_of_serial:
             try:
                 config = self.get_params(serial)
 
                 speeding_up_the_connection(config)
 
-                self.file_name = read_logs(config)
+                result = read_logs(config)
+
+                self.file_name = result
 
                 setting_the_speed_to_default_values(config)
 
                 self.analysis()
 
+                # for_report.append(result[0])
+                # for_report.append(copy(global_list))
+                with open('report.txt', 'a', encoding='utf-8') as f:
+                    formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
+                    f.write(f'Для файла >> {result[0]}:\n')
+                    f.write(formatted_list + '\n')
+
+                clear_global_list()
+
             except Exception as e:
                 print(f"Ошибка при считывании журналов счетчика №...{serial} >> ошибка {e}")
                 continue
+        # print(for_report)
+        with open('report.txt', 'r', encoding='utf-8') as f:
+            content = f.read()
+        message_in_out(content)
 
     def analysis(self):
 

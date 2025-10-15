@@ -2,6 +2,7 @@ from time import sleep
 
 from libs.Utils import *
 from libs.connect import *
+from libs.sending_message import global_list
 
 
 def read_type(config, attempt=1, max_attempts=5):
@@ -44,11 +45,8 @@ def read_logs(config):
     try:
         print(f"\nСтарт считывания журналов счетчика №..{config.serial_number}...\n")
         sample = sample_config(config.flag_viborka, config.first_date, config.second_date)
-        # device_type = reader.deviceType
-        # serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
-        # time = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
-        # file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
-        # excel_writer = pd.ExcelWriter(file_name)
+
+        # all_message = MessageForSending()
 
         device_type, excel_writer, file_name = read_type(config)
 
@@ -95,7 +93,7 @@ def read_logs(config):
 
         print("\nВСЕ ЖУРНАЛЫ ЗАПИСАНЫ\n")
 
-        return file_name, device_type
+        return [file_name, device_type]
     except Exception as e:
-        # print(f'Ошибка при общем считывании журналов >> {e} ')
+        print(f'Ошибка при общем считывании журналов >> {e} ')
         raise

@@ -14,7 +14,7 @@ pink_fill = PatternFill(start_color='FFCC99FF',
                         fill_type='solid')
 
 
-# считать excel
+# считать excel бля\ть
 def read_excel(path_to_file):
     try:
         sheets = load_workbook(path_to_file)

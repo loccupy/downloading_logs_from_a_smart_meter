@@ -223,7 +223,6 @@ class UiForLogLoader(QWidget):
     def start_read_log_thread(self):
         try:
             pattern = r'\d{1,60}'
-            print(self.serial.text().strip().replace(',', '', 30))
             if not self.com.text().strip():
                 raise ValueError("Поле COM не может быть пустым")
             # if not self.baud.text().strip():

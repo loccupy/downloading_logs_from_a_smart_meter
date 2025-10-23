@@ -1,16 +1,16 @@
 import os
+import re
 import sys
 from copy import copy
 
-import pandas as pd
+
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
-from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
 
 from libs.config import Config
-from libs.connect import get_reader, speeding_up_the_connection, init_connect, \
-    close_reader, setting_the_speed_to_default_values, connect_with_ip, get_reader_with_ip
+from libs.connect import setting_the_speed_to_default_values, connect_with_ip
 from libs.log_analysis_main import *
 from libs.read import read_logs
 from libs.sending_message import clear_global_list, global_list, message_in_out
@@ -78,7 +78,7 @@ class UiForLogLoader(QWidget):
         # self.serial.setMaxLength(4)
 
         self.com = self.findChild(QtWidgets.QLineEdit, 'com')
-        # self.ip.setValidator(QIntValidator())
+        self.com.setValidator(QIntValidator())
         self.com.setMaxLength(2)
 
         self.field_password = self.findChild(QtWidgets.QLineEdit, 'field_password')
@@ -89,22 +89,22 @@ class UiForLogLoader(QWidget):
 
         self.password.stateChanged.connect(self.update_password_field)
 
-        self.checkbox_temperature = self.findChild(QtWidgets.QCheckBox, 'temperature')
-        self.checkbox_viborka = self.findChild(QtWidgets.QCheckBox, 'viborka')
+        # self.checkbox_temperature = self.findChild(QtWidgets.QCheckBox, 'temperature')
+        # self.checkbox_viborka = self.findChild(QtWidgets.QCheckBox, 'viborka')
 
-        self.end_date = self.findChild(QtWidgets.QDateTimeEdit, 'end_date')
-        self.end_date.setEnabled(False)
-        self.start_date = self.findChild(QtWidgets.QDateTimeEdit, 'start_date')
-        self.start_date.setEnabled(False)
+        # self.end_date = self.findChild(QtWidgets.QDateTimeEdit, 'end_date')
+        # self.end_date.setEnabled(False)
+        # self.start_date = self.findChild(QtWidgets.QDateTimeEdit, 'start_date')
+        # self.start_date.setEnabled(False)
 
-        self.checkbox_viborka.stateChanged.connect(
-            lambda state: self.toggle_fields(state, self.start_date, self.end_date)
-        )
+        # self.checkbox_viborka.stateChanged.connect(
+        #     lambda state: self.toggle_fields(state, self.start_date, self.end_date)
+        # )
 
         self.read = self.findChild(QtWidgets.QPushButton, 'read')
         # self.read.clicked.connect(self.read_log)
 
-        self.analisys = self.findChild(QtWidgets.QPushButton, 'analisys')
+        # self.analisys = self.findChild(QtWidgets.QPushButton, 'analisys')
         # self.analisys.clicked.connect(self.analysis)
 
         self.text_edit = self.findChild(QtWidgets.QTextEdit, 'textEdit')
@@ -117,21 +117,21 @@ class UiForLogLoader(QWidget):
         self.applyDarkTheme()
 
         self.read.clicked.connect(self.start_read_log_thread)
-        self.analisys.clicked.connect(self.start_analysis_thread)
+        # self.analisys.clicked.connect(self.start_analysis_thread)
 
-    def get_params(self, serial):
+    def get_params(self):
         try:
             self.com_meter = self.com.text()
             # self.port_number = str(self.port.text())
-            self.serial_number = int(serial)
+            # self.serial_number = int(serial)
             self.passw = self.field_password.text()
             if self.password.isChecked() is False:
                 self.passw = '1234567898765432'
-            self.flag_temperatyre = self.checkbox_temperature.isChecked()
-            self.flag_viborka = self.checkbox_viborka.isChecked()
-            self.first_date = self.start_date.text()
-            self.second_date = self.end_date.text()
-            config = Config(self.com_meter, self.serial_number, self.passw, self.flag_temperatyre,
+            # self.flag_temperatyre = self.checkbox_temperature.isChecked()
+            # self.flag_viborka = self.checkbox_viborka.isChecked()
+            # self.first_date = self.start_date.text()
+            # self.second_date = self.end_date.text()
+            config = Config(self.com_meter, None, self.passw, self.flag_temperatyre,
                             self.flag_viborka, self.first_date, self.second_date)
             return config
         except Exception as e:
@@ -141,6 +141,7 @@ class UiForLogLoader(QWidget):
     def get_list_of_serial_numbers(self):
         try:
             list_of_serial = [i.strip() for i in self.serial.text().split(',')]
+
             return list_of_serial
         except Exception as e:
             print(f"Не удалось идентифицировать введенные серийные номера с ошибкой {e}!!!")
@@ -151,31 +152,31 @@ class UiForLogLoader(QWidget):
         for_report = []
         with open('report.txt', 'w', encoding='utf-8') as f:
             f.write('')
+        config = self.get_params()
         for serial in list_of_serial:
+            print(f'#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
+            config.serial_number = int(serial)
             try:
-                config = self.get_params(serial)
-
-                speeding_up_the_connection(config)
+                # speeding_up_the_connection(config)
 
                 result = read_logs(config)
 
                 self.file_name = result
 
-                setting_the_speed_to_default_values(config)
+                # setting_the_speed_to_default_values(config)
 
                 self.analysis()
 
-                # for_report.append(result[0])
-                # for_report.append(copy(global_list))
                 with open('report.txt', 'a', encoding='utf-8') as f:
                     formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
                     f.write(f'Для файла >> {result[0]}:\n')
                     f.write(formatted_list + '\n')
 
                 clear_global_list()
-
+                print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
             except Exception as e:
-                print(f"Ошибка при считывании журналов счетчика №...{serial} >> ошибка {e}")
+                setting_the_speed_to_default_values(config)
+                print(f"#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
                 continue
         # print(for_report)
         with open('report.txt', 'r', encoding='utf-8') as f:
@@ -183,7 +184,7 @@ class UiForLogLoader(QWidget):
         message_in_out(content)
 
     def analysis(self):
-
+        print(f"\n  СТАРТ АНАЛИЗА ЖУРНАЛОВ...")
         try:
             old_file_name = self.file_name[0]
             device_type = self.file_name[1]
@@ -215,18 +216,22 @@ class UiForLogLoader(QWidget):
             energy_profile_for_2_log_analysis(file_name)
             artur_profile_log_analysis(file_name)
 
-            print("АНАЛИЗ ЖУРНАЛОВ ЗАВЕРШЕН")
+            print(f"  АНАЛИЗ ЖУРНАЛОВ ЗАВЕРШЕН")
         except Exception as e:
             print(f"Ошибка при анализе {e}")
 
     def start_read_log_thread(self):
         try:
+            pattern = r'\d{1,60}'
+            print(self.serial.text().strip().replace(',', '', 30))
             if not self.com.text().strip():
                 raise ValueError("Поле COM не может быть пустым")
             # if not self.baud.text().strip():
             #     raise ValueError("Поле скорости соединения не может быть пустым")
             if not self.serial.text().strip():
                 raise ValueError("Поле серийного номера не может быть пустым")
+            elif not re.fullmatch(pattern, self.serial.text().strip().replace(',', '', 30)):
+                raise ValueError("Данные поля серийного номера не соответствуют паттерну <<Только числа и запятые>>")
             if not self.field_password.text().strip() and self.password.isChecked() is True:
                 raise ValueError("Поле пароля не может быть пустым")
         except Exception as e:
@@ -240,7 +245,7 @@ class UiForLogLoader(QWidget):
             return
 
         self.read.setEnabled(False)
-        self.analisys.setEnabled(False)
+        # self.analisys.setEnabled(False)
         self.thread = WorkerThread(self, self.read_log)
         self.thread.finished.connect(self.on_read_finished)
         self.thread.error.connect(self.on_error)
@@ -271,7 +276,7 @@ class UiForLogLoader(QWidget):
 
     def on_read_finished(self, result):
         self.read.setEnabled(True)
-        self.analisys.setEnabled(True)
+        # self.analisys.setEnabled(True)
         self.thread = None
 
     def on_analysis_finished(self, result):

@@ -260,7 +260,7 @@ def checkForSelfDiagnostics(sheets, log_name):
                 break
 
         # Проверяем все значения столбца и, в случае совпадения условия, перекрашиваем ячейку
-        for i, row in enumerate(sheet.iter_rows(min_row=2, min_col=column, max_col=column)):
+        for row in sheet.iter_rows(min_row=2, min_col=column, max_col=column):
             if row[0].value in errorsList:
                 row[0].fill = pink_fill
                 sleep(0.1)

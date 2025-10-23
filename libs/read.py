@@ -6,7 +6,7 @@ from libs.sending_message import global_list
 
 
 def read_type(config, attempt=1, max_attempts=5):
-    print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...\n")
+    print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...", end='')
     reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
     reader = reader_list[0]
     settings = reader_list[1]
@@ -43,20 +43,25 @@ def read_type(config, attempt=1, max_attempts=5):
 
 def read_logs(config):
     try:
-        print(f"\nСтарт считывания журналов счетчика №..{config.serial_number}...\n")
-        sample = sample_config(config.flag_viborka, config.first_date, config.second_date)
+
+        speeding_up_the_connection(config)
+
+        sample = ['N']
 
         # all_message = MessageForSending()
 
         device_type, excel_writer, file_name = read_type(config)
+
+        print(f"\n  СТАРТ СЧИТЫВАНИЯ ЖУРНАЛОВ СЧЕТЧИКА №..{config.serial_number}...")
+        # sample = sample_config(config.flag_viborka, config.first_date, config.second_date)
 
         reader = config
 
         create_sheet_in_excel_file(unloading_currents_log, excel_writer, 'Журнал токов', reader, sample)
         create_sheet_in_excel_file(unloading_the_voltage_log, excel_writer, 'Журнал напряжения', reader, sample)
         create_sheet_in_excel_file(unloading_power_log, excel_writer, 'Журнал мощности', reader, sample)
-        if config.flag_viborka:
-            create_sheet_in_excel_file(unloading_temperature_log, excel_writer, 'Журнал температуры', reader, sample)
+        # if config.flag_viborka:
+        #     create_sheet_in_excel_file(unloading_temperature_log, excel_writer, 'Журнал температуры', reader, sample)
         create_sheet_in_excel_file(unloading_self_diagnosis_log, excel_writer, 'Журнал самодиагностики', reader, sample)
         create_sheet_in_excel_file(unloading_network_quality_log, excel_writer, 'Журнал качества сети', reader, sample)
         create_sheet_in_excel_file(unloading_time_correction_log, excel_writer, 'Журнал коррекции времени', reader, sample)
@@ -91,9 +96,11 @@ def read_logs(config):
 
         excel_writer.close()
 
-        print("\nВСЕ ЖУРНАЛЫ ЗАПИСАНЫ\n")
+        print("\nВСЕ ЖУРНАЛЫ ЗАПИСАНЫ")
+
+        setting_the_speed_to_default_values(config)
 
         return [file_name, device_type]
     except Exception as e:
-        print(f'Ошибка при общем считывании журналов >> {e} ')
+        print(f'ОШИБКА ПРИ ОБЩЕМ СЧИТЫВАНИИ ЖУРНАЛОВ СЧЕТЧИКА №...{config.serial_number} >> {e} ')
         raise

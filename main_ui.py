@@ -175,6 +175,9 @@ class UiForLogLoader(QWidget):
             device_type = self.file_name[1]
             file_name = old_file_name.replace('.xlsx', '_анализ.xlsx')
 
+            sheets = load_workbook(old_file_name)
+            sheets.save(file_name)
+
             current_log_analysis(file_name)
             self_diagnosis_log_analysis(file_name)
             network_quality_log_analysis(file_name)

@@ -273,3 +273,44 @@ def checkForSelfDiagnostics(sheets, log_name):
 
     except Exception as e:
         raise f"Ошибка {e} при анализе кодов ошибок в {parse_log_name(log_name)}"
+
+
+# проверяет повторные включения или выключения в журнале вкл\выкл
+def checking_for_repeated_on_or_offs(sheets, log_name):
+    format_dt = "%d.%m.%y %H:%M:%S"
+    try:
+        sheet = sheets[log_name]
+        column = None
+        column_names = [cell for cell in sheet[1]]
+        # Получаем номер столбца по названию
+        for i in column_names:
+            if i.value == 'Событие':
+                column = i.column
+                break
+
+        # Проверяем все значения столбца и, в случае совпадения условия, перекрашиваем ячейку
+        for i, row in enumerate(sheet.iter_rows(min_row=2, min_col=column, max_col=column)):
+            # Получаем и сохраняем первую ячейку + пропускаем ее для обработки
+            if i == 0:
+                cell_0 = row[0]
+                continue
+
+            # Получаем ячейку
+            cell_1 = row[0]
+
+            if str(cell_0.value) == str(cell_1.value):
+                # Проверяем условие
+
+                cell_0.fill = pink_fill
+                sleep(0.1)
+                cell_1.fill = pink_fill
+                sleep(0.1)
+
+                print(
+                    f"Повторяется код события в строчках {cell_0.row}-{cell_1.row} в"
+                    f" '{parse_log_name(log_name)}'")
+                add_to_global_list(f"Повторяется код события в строчках {cell_0.row}-{cell_1.row} в"
+                    f" '{parse_log_name(log_name)}'")
+            cell_0 = row[0]
+    except Exception as e:
+        raise f"Ошибка {e} при анализе повторных кодов событий в {parse_log_name(log_name)}"

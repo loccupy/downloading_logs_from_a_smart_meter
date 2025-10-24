@@ -254,9 +254,6 @@ def checkForSelfDiagnostics(sheets, log_name):
                 print(
                     f"Код ошибки {row[0].value.split(',')[0]} в строчке {row[0].row} в"
                     f" '{parse_log_name(log_name)}'")
-                add_to_global_list(
-                    f"Код ошибки {row[0].value.split(',')[0]} в строчке {row[0].row} в"
-                    f" '{parse_log_name(log_name)}'")
 
     except Exception as e:
         raise f"Ошибка {e} при анализе кодов ошибок в {parse_log_name(log_name)}"
@@ -295,8 +292,6 @@ def checking_for_repeated_on_or_offs(sheets, log_name):
 
                 print(
                     f"Повторяется код события в строчках {cell_0.row}-{cell_1.row} в"
-                    f" '{parse_log_name(log_name)}'")
-                add_to_global_list(f"Повторяется код события в строчках {cell_0.row}-{cell_1.row} в"
                     f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:

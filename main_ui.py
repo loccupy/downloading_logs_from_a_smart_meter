@@ -161,18 +161,31 @@ class UiForLogLoader(QWidget):
         try:
             self._speeding_up()
 
-            self.file_name = read_logs(self.reader, self.flag_temperatyre, self.flag_viborka, self.first_date,
-                                       self.second_date)
+            result = read_logs(self.reader, self.flag_temperatyre, self.flag_viborka, self.first_date,
+                               self.second_date)[1]
 
             self._speeding_down_and_close()
 
         except Exception as e:
             print(f"Ошибка при считывании журналов >> {e}")
 
+
+    def check_device_type_from_filename(self, filename):
+        if '1PH' in filename:
+            return '1PH'
+        elif '3PH' in filename:
+            return '3PH'
+        elif 'TT' in filename:
+            return 'TT'
+        else:
+            print('Тип счетчика не распознан')
+            raise Exception('Тип счетчика не распознан')
+
+
     def analysis(self):
         try:
-            old_file_name = self.file_name[0]
-            device_type = self.file_name[1]
+            old_file_name = self.file_name
+            device_type = self.check_device_type_from_filename(old_file_name)
             file_name = old_file_name.replace('.xlsx', '_анализ.xlsx')
 
             sheets = load_workbook(old_file_name)
@@ -193,7 +206,7 @@ class UiForLogLoader(QWidget):
             network_quality_for_period_log_analysis(file_name)
             on_and_off_log_analysis(file_name)
             external_influences_log_analysis(file_name)
-            if 'TT' in self.file_name:
+            if 'TT' == device_type:
                 sampling_status_log_analysis(file_name)
             daily_profile_log_analysis(file_name)
             month_profile_log_analysis(file_name)

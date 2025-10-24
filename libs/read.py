@@ -54,7 +54,7 @@ def read_logs(reader, flag_temperatyre, viborka, start, end):
 
         print("\nВСЕ ЖУРНАЛЫ ЗАПИСАНЫ\n")
 
-        return file_name, device_type
+        return [file_name, device_type]
     except Exception as e:
         # print(f'Ошибка при общем считывании журналов >> {e} ')
         raise

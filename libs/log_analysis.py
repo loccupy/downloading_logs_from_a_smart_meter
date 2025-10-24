@@ -350,10 +350,7 @@ def time_ordering_analysis_for_artur_profile(sheets, log_name):
                     sleep(0.1)
 
                     print(
-                        f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
-                        f" '{parse_log_name(log_name)}'")
-                    add_to_global_list(
-                        f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
+                        f"Некорректная разница во времени фиксации записей в строчках {cell_0.row}-{cell_1.row} в"
                         f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:

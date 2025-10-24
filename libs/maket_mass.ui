@@ -37,7 +37,7 @@
      <x>10</x>
      <y>10</y>
      <width>531</width>
-     <height>141</height>
+     <height>101</height>
     </rect>
    </property>
    <property name="title">
@@ -99,53 +99,6 @@
      <string>Введите все серийники (4 цифры) через запятую</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="field_password">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>100</y>
-      <width>361</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="maxLength">
-     <number>16</number>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-    <property name="dragEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="readOnly">
-     <bool>false</bool>
-    </property>
-    <property name="placeholderText">
-     <string>Введите пароль</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="password">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>100</y>
-      <width>141</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::RightToLeft</enum>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>Пароль не дефолтный</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
@@ -183,7 +136,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>160</y>
+     <y>120</y>
      <width>511</width>
      <height>31</height>
     </rect>
@@ -196,9 +149,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>200</y>
+     <y>160</y>
      <width>531</width>
-     <height>241</height>
+     <height>281</height>
     </rect>
    </property>
   </widget>

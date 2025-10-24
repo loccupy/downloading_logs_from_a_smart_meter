@@ -81,13 +81,13 @@ class UiForLogLoader(QWidget):
         self.com.setValidator(QIntValidator())
         self.com.setMaxLength(2)
 
-        self.field_password = self.findChild(QtWidgets.QLineEdit, 'field_password')
-        self.field_password.setEnabled(False)
-        self.field_password.setMaxLength(16)
+        # self.field_password = self.findChild(QtWidgets.QLineEdit, 'field_password')
+        # self.field_password.setEnabled(False)
+        # self.field_password.setMaxLength(16)
 
-        self.password = self.findChild(QtWidgets.QCheckBox, 'password')
-
-        self.password.stateChanged.connect(self.update_password_field)
+        # self.password = self.findChild(QtWidgets.QCheckBox, 'password')
+        #
+        # self.password.stateChanged.connect(self.update_password_field)
 
         # self.checkbox_temperature = self.findChild(QtWidgets.QCheckBox, 'temperature')
         # self.checkbox_viborka = self.findChild(QtWidgets.QCheckBox, 'viborka')
@@ -124,14 +124,14 @@ class UiForLogLoader(QWidget):
             self.com_meter = self.com.text()
             # self.port_number = str(self.port.text())
             # self.serial_number = int(serial)
-            self.passw = self.field_password.text()
-            if self.password.isChecked() is False:
-                self.passw = '1234567898765432'
+            # self.passw = self.field_password.text()
+            # if self.password.isChecked() is False:
+            #     self.passw = '1234567898765432'
             # self.flag_temperatyre = self.checkbox_temperature.isChecked()
             # self.flag_viborka = self.checkbox_viborka.isChecked()
             # self.first_date = self.start_date.text()
             # self.second_date = self.end_date.text()
-            config = Config(self.com_meter, None, self.passw, self.flag_temperatyre,
+            config = Config(self.com_meter, None, '1234567898765432', self.flag_temperatyre,
                             self.flag_viborka, self.first_date, self.second_date)
             return config
         except Exception as e:
@@ -231,8 +231,8 @@ class UiForLogLoader(QWidget):
                 raise ValueError("Поле серийного номера не может быть пустым")
             elif not re.fullmatch(pattern, self.serial.text().strip().replace(',', '', 30)):
                 raise ValueError("Данные поля серийного номера не соответствуют паттерну <<Только числа и запятые>>")
-            if not self.field_password.text().strip() and self.password.isChecked() is True:
-                raise ValueError("Поле пароля не может быть пустым")
+            # if not self.field_password.text().strip() and self.password.isChecked() is True:
+            #     raise ValueError("Поле пароля не может быть пустым")
         except Exception as e:
             QMessageBox.warning(
                 self,

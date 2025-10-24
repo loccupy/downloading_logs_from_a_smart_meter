@@ -2,7 +2,7 @@ from openpyxl.reader.excel import load_workbook
 
 from libs.log_analysis import ipu_working_hours_ref, analysis_correct_date_ref, time_ordering_analysis_ref, \
     time_ordering_analysis_for_daily_profile, time_ordering_analysis_for_month_profile, checkForSelfDiagnostics, \
-    checking_for_repeated_on_or_offs
+    checking_for_repeated_on_or_offs, time_ordering_analysis_for_artur_profile
 
 
 def current_log_analysis(path_to_file):
@@ -341,6 +341,7 @@ def artur_profile_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
+        time_ordering_analysis_for_artur_profile(sheets, log_name)
 
         sheets.save(path_to_file)
 

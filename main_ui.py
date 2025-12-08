@@ -117,8 +117,8 @@ class UiForLogLoader(QWidget):
         # Применение темной темы
         self.applyDarkTheme()
 
-        self.read.clicked.connect(self.start_read_log_thread)
-        # self.read.clicked.connect(self.start_read_meter_data)
+        # self.read.clicked.connect(self.start_read_log_thread)
+        self.read.clicked.connect(self.start_read_meter_data)
         # self.analisys.clicked.connect(self.start_analysis_thread)
 
     def get_params(self):

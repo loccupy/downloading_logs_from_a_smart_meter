@@ -156,14 +156,14 @@ class UiForLogLoader(QWidget):
             return list_of_serial
         except Exception as e:
             print(f"Не удалось получить серийные номера по api запросу с ошибкой {e}!!!")
-            return []
+            raise
 
     def read_meter_data(self):
         list_of_serial = self.get_list_of_serial_numbers_from_api()
         config = self.get_params()
         while True:
             for serial in list_of_serial:
-                print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####')
+                print(f'\n#####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
                 config.serial_number = int(serial)
                 try:
                     meter_survey(config)

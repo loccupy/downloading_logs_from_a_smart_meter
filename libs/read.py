@@ -2,20 +2,33 @@ from time import sleep
 
 from libs.Utils import *
 from libs.connect import *
+from libs.gurux.dlms.objects import GXDLMSClock
 from libs.sending_message import global_list, message_in_out
 
 
 def read_data(config, attempt=1, max_attempts=5):
-    print(f"\nПровожу опрос счетчика № ...{config.serial_number}...", end='')
+    print(f"\nПровожу опрос счетчика №[...{config.serial_number}]...", end='')
     reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
     reader = reader_list[0]
     settings = reader_list[1]
     try:
         init_connect(reader, settings)
+
         device_type = reader.deviceType
         serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
+        current_time = datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)), "%m/%d/%y %H:%M:%S")
+        time = datetime.now()
+        delta = abs(current_time - time)
+
+        print(f'Тип счетчика >> {device_type}')
+        print(f'Серийный номер счетчика >> {serial_number}')
+        print(f'Расхождение времени >> {delta}')
         print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
+
         close_reader(reader)
+
+        if attempt != 1:
+            message_in_out(f"#ОпросПУ\n Удалось подключиться к счетчику №[...{config.serial_number}] с {attempt}-ой попытки.")
         # time = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
         # file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
         # excel_writer = pd.ExcelWriter(file_name)
@@ -33,7 +46,7 @@ def read_data(config, attempt=1, max_attempts=5):
             )
         else:
             print(f"Превышено количество попыток подключения при опросе счетчика (5). Ошибка: {e}")
-            message_in_out(f"Не удалось подключиться к счетчику №...{config.serial_number}!!!")
+            message_in_out(f"#ОпросПУ\n Не удалось подключиться к счетчику №...{config.serial_number}!!!")
             raise
 
 

@@ -2,7 +2,7 @@ import os
 import re
 import sys
 from copy import copy
-
+from time import sleep
 
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
@@ -12,8 +12,9 @@ from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
 from libs.config import Config
 from libs.connect import setting_the_speed_to_default_values, connect_with_ip
 from libs.log_analysis_main import *
-from libs.read import read_logs
+from libs.read import read_logs, meter_survey
 from libs.sending_message import clear_global_list, global_list, message_in_out
+from libs.test_get_info_from_rsm import get_serial_numbers
 
 
 class WorkerThread(QThread):
@@ -117,6 +118,7 @@ class UiForLogLoader(QWidget):
         self.applyDarkTheme()
 
         self.read.clicked.connect(self.start_read_log_thread)
+        # self.read.clicked.connect(self.start_read_meter_data)
         # self.analisys.clicked.connect(self.start_analysis_thread)
 
     def get_params(self):
@@ -146,6 +148,30 @@ class UiForLogLoader(QWidget):
         except Exception as e:
             print(f"Не удалось идентифицировать введенные серийные номера с ошибкой {e}!!!")
             return []
+
+    def get_list_of_serial_numbers_from_api(self):
+        try:
+            list_of_serial = get_serial_numbers()
+
+            return list_of_serial
+        except Exception as e:
+            print(f"Не удалось получить серийные номера по api запросу с ошибкой {e}!!!")
+            return []
+
+    def read_meter_data(self):
+        list_of_serial = self.get_list_of_serial_numbers_from_api()
+        config = self.get_params()
+        while True:
+            for serial in list_of_serial:
+                print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####')
+                config.serial_number = int(serial)
+                try:
+                    meter_survey(config)
+                    print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
+                except Exception as e:
+                    print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
+                    continue
+            sleep(30)
 
     def read_log(self):
         list_of_serial = self.get_list_of_serial_numbers()
@@ -270,6 +296,36 @@ class UiForLogLoader(QWidget):
         self.read.setEnabled(False)
         self.thread = WorkerThread(self, self.analysis)
         self.thread.finished.connect(self.on_analysis_finished)
+        self.thread.error.connect(self.on_error)
+        self.thread.start()
+
+    def start_read_meter_data(self):
+        try:
+            # pattern = r'\d{1,60}'
+            if not self.com.text().strip():
+                raise ValueError("Поле COM не может быть пустым")
+            # if not self.baud.text().strip():
+            #     raise ValueError("Поле скорости соединения не может быть пустым")
+            # if not self.serial.text().strip():
+            #     raise ValueError("Поле серийного номера не может быть пустым")
+            # elif not re.fullmatch(pattern, self.serial.text().strip().replace(',', '', 30)):
+            #     raise ValueError("Данные поля серийного номера не соответствуют паттерну <<Только числа и запятые>>")
+            # if not self.field_password.text().strip() and self.password.isChecked() is True:
+            #     raise ValueError("Поле пароля не может быть пустым")
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Ошибка ввода",
+                f"Ошибка в заполнении формы: {e}"
+            )
+            return
+        if self.thread and self.thread.isRunning():
+            return
+
+        self.read.setEnabled(False)
+        # self.analisys.setEnabled(False)
+        self.thread = WorkerThread(self, self.read_meter_data)
+        self.thread.finished.connect(self.on_read_finished)
         self.thread.error.connect(self.on_error)
         self.thread.start()
 

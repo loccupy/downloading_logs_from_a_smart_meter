@@ -2,7 +2,39 @@ from time import sleep
 
 from libs.Utils import *
 from libs.connect import *
-from libs.sending_message import global_list
+from libs.sending_message import global_list, message_in_out
+
+
+def read_data(config, attempt=1, max_attempts=5):
+    print(f"\nПровожу опрос счетчика № ...{config.serial_number}...", end='')
+    reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
+    reader = reader_list[0]
+    settings = reader_list[1]
+    try:
+        init_connect(reader, settings)
+        device_type = reader.deviceType
+        serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
+        print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
+        close_reader(reader)
+        # time = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
+        # file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
+        # excel_writer = pd.ExcelWriter(file_name)
+        # return device_type, excel_writer, file_name
+    except Exception as e:
+        close_reader(reader)
+        if attempt < max_attempts:
+            print(f"Попытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}")
+            print(f"Повторяем попытку через 2 секунды...")
+            sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            return read_data(
+                config,
+                attempt + 1,
+                max_attempts
+            )
+        else:
+            print(f"Превышено количество попыток подключения при опросе счетчика (5). Ошибка: {e}")
+            message_in_out(f"Не удалось подключиться к счетчику №...{config.serial_number}!!!")
+            raise
 
 
 def read_type(config, attempt=1, max_attempts=5):
@@ -39,6 +71,15 @@ def read_type(config, attempt=1, max_attempts=5):
         else:
             print(f"Превышено количество попыток подключения при считывании типа счетчика (5). Ошибка: {e}")
             raise
+
+
+# meter survey
+def meter_survey(config):
+    try:
+        read_data(config)
+    except Exception as e:
+        print(f'ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{config.serial_number} >> {e} ')
+        raise
 
 
 def read_logs(config):

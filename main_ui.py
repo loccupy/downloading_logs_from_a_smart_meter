@@ -9,6 +9,7 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
 
+from libs.check_time import CheckTime
 from libs.config import Config
 from libs.connect import setting_the_speed_to_default_values, connect_with_ip
 from libs.log_analysis_main import *
@@ -161,12 +162,16 @@ class UiForLogLoader(QWidget):
     def read_meter_data(self):
         list_of_serial = self.get_list_of_serial_numbers_from_api()
         config = self.get_params()
+        time_for_check = CheckTime(list_of_serial)
+        file_name = "пробный_прогон.txt"
+        with open(file_name, "w", encoding="utf-8"):
+            pass
         while True:
             for serial in list_of_serial:
                 print(f'\n#####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
                 config.serial_number = int(serial)
                 try:
-                    meter_survey(config)
+                    meter_survey(config, time_for_check, file_name)
                     print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
                 except Exception as e:
                     print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")

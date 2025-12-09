@@ -5,7 +5,8 @@ import pandas as pd
 
 from libs.connect import init_connect, close_reader, get_reader_with_ip, get_reader
 from libs.gurux.dlms import GXDateTime
-from libs.gurux.dlms.objects import GXDLMSProfileGeneric
+from libs.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
+from libs.sending_message import message_in_out
 
 
 def unloading_energy_profile_for_recording_interval_1(open_and_close_connection, sample):
@@ -1417,3 +1418,81 @@ def current_with_scalar(current):
 
 def power_with_scalar(power):
     return power * 0.001
+
+
+def check_time(config, reader, time_for_check):
+    try:
+        if time_for_check.get_time(config.serial_number) is None:
+            time_for_check.set_time(config.serial_number,
+                                    datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)),
+                                                      "%m/%d/%y %H:%M:%S"))
+            time_for_check.start_timer(config.serial_number)
+            duration = 'Не рассчитывается на первом круге'
+        else:
+            current_time = datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)), "%m/%d/%y %H:%M:%S")
+            duration = (current_time - time_for_check.get_time(config.serial_number) -
+                        time_for_check.get_timer(config.serial_number)).total_seconds()
+            time_for_check.set_time(config.serial_number, current_time)
+            time_for_check.start_timer(config.serial_number)
+
+        return duration
+    except Exception as e:
+        message_in_out(f'Ошибка при проверке расхождения времени >> {e}')
+        raise
+
+
+def write_txt(file_name, text):
+    with open(file_name, "a", encoding="utf-8") as f:
+        f.write(text)
+
+
+def check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_diagnostic, file_name):
+    try:
+        print("Начал запись Журнала самодиагностики...")
+
+        key = config.serial_number
+        current_time = datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)), "%m/%d/%y %H:%M:%S")
+
+        if time_for_check_self_diagnostic.get_start_time(key) is None:
+            time_for_check_self_diagnostic.set_start_time(key, current_time)
+            write_txt(file_name, f"\nСтарт отчетного периода для журнала самодиагностики!!!\n")
+            print(f"Старт отчетного периода для журнала самодиагностики!!!")
+            return
+        else:
+            time_for_check_self_diagnostic.set_end_time(key, current_time)
+
+            data = GXDLMSProfileGeneric("0.0.99.98.7.255")
+            reader.read(data, 3)
+            buffer = reader.read_rows_by_range(data, time_for_check_self_diagnostic.get_start_time(key),
+                                               time_for_check_self_diagnostic.get_end_time(key))
+            code_list = [i[1] for i in buffer]
+
+            errors_dict = {
+                2: "Измерительный блок — ошибка",
+                4: "Вычислительный блок — ошибка",
+                5: "Часы реального времени — ошибка",
+                7: "Блок питания — ошибка",
+                9: "Дисплей — ошибка",
+                11: "Блок памяти — ошибка",
+                13: "Блок памяти программ — ошибка",
+                15: "Система тактирования ядра — ошибка",
+                17: "Система тактирования часов — ошибка",
+                129: "Аппаратный сброс часов реального времени",
+                132: "Сброс микроконтроллера сторожевым таймером"
+            }
+
+            errors_list = list(errors_dict.keys())
+
+            for i in code_list:
+                if i in errors_list:
+                    message_in_out(f'\nВ журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!')
+                    write_txt(file_name, f"\nВ журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!\n")
+                    print(f"В журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!")
+            else:
+                write_txt(file_name, f"\nВ журнале самодиагностики аварийного кода не обнаружено.\n")
+                print(f"В журнале самодиагностики аварийного кода не обнаружено.")
+
+            time_for_check_self_diagnostic.set_start_time(key, current_time)
+    except Exception as e:
+        message_in_out(f'Ошибка при проверке кода ошибки в журнале самодиагностики >> {e}')
+        raise

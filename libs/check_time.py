@@ -23,15 +23,3 @@ class CheckTime:
         time = self.all_timer[key]
         diff = datetime.now() - time
         return diff
-
-    # def get_duration(self, start_key: str, end_key: str) -> float:
-    #     """Получить разницу во времени между двумя метками (в секундах)"""
-    #     start = self.all_time.get(start_key)
-    #     end = self.all_time.get(end_key)
-    #
-    #     if not start:
-    #         raise KeyError(f"Нет времени с ключом '{start_key}'")
-    #     if not end:
-    #         raise KeyError(f"Нет времени с ключом '{end_key}'")
-    #
-    #     return (end - start).total_seconds()

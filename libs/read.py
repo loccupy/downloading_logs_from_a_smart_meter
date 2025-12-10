@@ -1,16 +1,15 @@
 from time import sleep
 
 from libs.Utils import *
+from libs.check_self_diagnostic_log import check_error_code_in_self_diagnostic_log
+from libs.check_time import check_time
 from libs.connect import *
-from libs.gurux.dlms.objects import GXDLMSClock
-from libs.sending_message import global_list, message_in_out
+from libs.sending_message import message_in_out
 
 
 def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,  attempt=1, max_attempts=5):
     print(f"\nПровожу опрос счетчика №[...{config.serial_number}]...", end='')
 
-    # with open(file_name, "a", encoding="utf-8") as f:
-    #     f.write(f"\nПровожу опрос счетчика №[...{config.serial_number}]...")
     write_txt(file_name, f"\nПровожу опрос счетчика №[...{config.serial_number}]...")
 
     reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
@@ -21,19 +20,6 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
 
         device_type = reader.deviceType
         serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
-
-        # if time_for_check.get_time(config.serial_number) is None:
-        #     time_for_check.set_time(config.serial_number,
-        #                             datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)),
-        #                                               "%m/%d/%y %H:%M:%S"))
-        #     time_for_check.start_timer(config.serial_number)
-        #     duration = 'Не рассчитывается на первом круге'
-        # else:
-        #     current_time = datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)), "%m/%d/%y %H:%M:%S")
-        #     duration = (current_time - time_for_check.get_time(config.serial_number) -
-        #                 time_for_check.get_timer(config.serial_number)).total_seconds()
-        #     time_for_check.set_time(config.serial_number, current_time)
-        #     time_for_check.start_timer(config.serial_number)
 
         duration = check_time(config, reader, time_for_check)
 
@@ -50,24 +36,14 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
         print(f'Расхождение времени >> {duration}')
         print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
 
-        # with open(file_name, "a", encoding="utf-8") as f:
-        #     f.write(f'\nТип счетчика >> {device_type}')
-        #     f.write(f'\nСерийный номер счетчика >> {serial_number}')
-        #     f.write(f'\nРасхождение времени >> {duration} сек.')
-        #     f.write(f"\nТип счетчика и серийный номер с прибора учета успешно считаны!!!\n")
-
         if attempt != 1:
             message_in_out(f"#ОпросПУ\n Удалось подключиться к счетчику №[...{config.serial_number}] с {attempt}-ой попытки.")
-            # with open(file_name, "a", encoding="utf-8") as f:
-            #     f.write(f"\nУдалось подключиться к счетчику №[...{config.serial_number}] с {attempt}-ой попытки.")
             write_txt(file_name, f"\nУдалось подключиться к счетчику №[...{config.serial_number}] с {attempt}-ой попытки.")
 
     except Exception as e:
         close_reader(reader)
         if attempt < max_attempts:
             print(f"Попытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}")
-            # with open(file_name, "a", encoding="utf-8") as f:
-            #     f.write(f"\nПопытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}\n")
             write_txt(file_name,
                       f"\nПопытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}\n")
             print(f"Повторяем попытку через 2 секунды...")
@@ -76,14 +52,13 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
                 config,
                 time_for_check,
                 time_for_check_self_diagnostic,
+                file_name,
                 attempt + 1,
                 max_attempts
             )
         else:
             print(f"Превышено количество попыток подключения при опросе счетчика (5). Ошибка: {e}")
             message_in_out(f"#ОпросПУ\n Не удалось подключиться к счетчику №...{config.serial_number}!!!")
-            # with open(file_name, "a", encoding="utf-8") as f:
-            #     f.write(f"\n Не удалось подключиться к счетчику №...{config.serial_number}!!!\n")
             write_txt(file_name, f"\n Не удалось подключиться к счетчику №...{config.serial_number}!!!\n")
             raise
 
@@ -105,11 +80,6 @@ def read_type(config, attempt=1, max_attempts=5):
         return device_type, excel_writer, file_name
     except Exception as e:
         close_reader(reader)
-        # print(f'Ошибка при считывании типа счетчика и формировании стартового excel файла >> {e} ')
-        # raise
-        # close_reader(reader)
-        # print(f"Не удалось установить скорость на дефолтные значения c ошибкой {e.args}")
-        # raise
         if attempt < max_attempts:
             print(f"Попытка подключения при считывании типа счетчика {attempt} из {max_attempts} не удалась: {e}")
             print(f"Повторяем попытку через 2 секунды...")

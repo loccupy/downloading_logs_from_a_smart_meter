@@ -46,12 +46,13 @@ def check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_
                 if i in errors_list:
                     message_in_out(f'\nВ журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!')
                     write_txt(file_name, f"\nВ журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!\n")
-                    print(f"В журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!")
+                    message = f"В журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!"
             else:
                 write_txt(file_name, f"\nВ журнале самодиагностики аварийного кода не обнаружено.\n")
-                print(f"В журнале самодиагностики аварийного кода не обнаружено.")
+                message =  f"В журнале самодиагностики аварийного кода не обнаружено."
 
             time_for_check_self_diagnostic.set_start_time(key, current_time)
+            return message
     except Exception as e:
         message_in_out(f'Ошибка при проверке кода ошибки в журнале самодиагностики >> {e}')
         raise

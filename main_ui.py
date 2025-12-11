@@ -1,7 +1,9 @@
 import os
 import re
 import sys
+import time
 from copy import copy
+from datetime import datetime
 from time import sleep
 
 from PyQt5 import uic, QtWidgets
@@ -9,6 +11,7 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
 
+from libs.Utils import timer_every_10_minutes
 from libs.check_self_diagnostic_log import CheckSelfDiagnostic
 from libs.check_time import CheckTime
 from libs.config import Config
@@ -119,8 +122,8 @@ class UiForLogLoader(QWidget):
         # Применение темной темы
         self.applyDarkTheme()
 
-        # self.read.clicked.connect(self.start_read_log_thread)
         self.read.clicked.connect(self.start_read_meter_data)
+        self.read.clicked.connect(self.start_read_log_thread)
         # self.analisys.clicked.connect(self.start_analysis_thread)
 
     def get_params(self):
@@ -160,61 +163,86 @@ class UiForLogLoader(QWidget):
             print(f"Не удалось получить серийные номера по api запросу с ошибкой {e}!!!")
             raise
 
-    def read_meter_data(self):
+    def read_meter_data_task(self):
         list_of_serial = self.get_list_of_serial_numbers_from_api()
         config = self.get_params()
         time_for_check = CheckTime(list_of_serial)
         time_for_check_self_diagnostic = CheckSelfDiagnostic(list_of_serial)
-        file_name = "пробный_прогон.txt"
+        file_name = "Логи_опроса.txt"
         with open(file_name, "w", encoding="utf-8"):
             pass
         while True:
-            for serial in list_of_serial:
-                print(f'\n#####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
-                config.serial_number = int(serial)
-                try:
-                    meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
-                    print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
-                except Exception as e:
-                    print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
-                    continue
-            sleep(30)
+            current_time = datetime.now()
+            # Проверяем, если минуты кратны 5
+            if current_time.minute % 50 == 0:
+                for serial in list_of_serial:
+                    print(f'\n#####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
+                    config.serial_number = int(serial)
+                    try:
+                        meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
+                        print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
+                    except Exception as e:
+                        print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
+                        continue
+            # Ждем 1 минуту
+            time.sleep(60)
 
     def read_log(self):
-        list_of_serial = self.get_list_of_serial_numbers()
+        list_of_serial = self.get_list_of_serial_numbers_from_api()
         for_report = []
-        with open('report.txt', 'w', encoding='utf-8') as f:
-            f.write('')
+        # with open('report.txt', 'w', encoding='utf-8') as f:
+        #     f.write('')
         config = self.get_params()
-        for serial in list_of_serial:
-            print(f'#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
-            config.serial_number = int(serial)
-            try:
-                # speeding_up_the_connection(config)
+        while True:
+            current_time = datetime.now()
+            # Проверяем, если минуты кратны 10
+            if current_time.minute % 56 == 0:
+                tm = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
+                main_directory = f'Выгрузка_журналов_{tm}'
 
-                result = read_logs(config)
+                if not os.path.exists(main_directory):
+                    os.makedirs(main_directory)
 
-                self.file_name = result
+                file_name = f'report.txt'
+                file_path = os.path.join(main_directory, file_name)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write('')
 
-                # setting_the_speed_to_default_values(config)
+                for serial in list_of_serial:
 
-                self.analysis()
 
-                with open('report.txt', 'a', encoding='utf-8') as f:
-                    formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
-                    f.write(f'Для файла >> {result[0]}:\n')
-                    f.write(formatted_list + '\n')
+                    print(f'#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
+                    config.serial_number = int(serial)
+                    try:
+                        # speeding_up_the_connection(config)
 
-                clear_global_list()
-                print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
-            except Exception as e:
-                setting_the_speed_to_default_values(config)
-                print(f"#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
-                continue
-        # print(for_report)
-        with open('report.txt', 'r', encoding='utf-8') as f:
-            content = f.read()
-        message_in_out(content)
+                        result = read_logs(config, main_directory)
+
+                        self.file_name = result
+
+                        # setting_the_speed_to_default_values(config)
+
+                        self.analysis()
+
+                        with open(file_path, 'a', encoding='utf-8') as f:
+                            formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
+                            f.write(f'Для файла >> {result[0]}:\n')
+                            f.write(formatted_list + '\n')
+
+                        clear_global_list()
+                        print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
+                    except Exception as e:
+                        setting_the_speed_to_default_values(config)
+                        print(f"#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
+                        continue
+                # print(for_report)
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                message_in_out(content)
+
+            sleep(60)
+
+
 
     def analysis(self):
         print(f"\n  СТАРТ АНАЛИЗА ЖУРНАЛОВ...")
@@ -255,33 +283,21 @@ class UiForLogLoader(QWidget):
 
     def start_read_log_thread(self):
         try:
-            pattern = r'\d{1,60}'
             if not self.com.text().strip():
                 raise ValueError("Поле COM не может быть пустым")
-            # if not self.baud.text().strip():
-            #     raise ValueError("Поле скорости соединения не может быть пустым")
-            if not self.serial.text().strip():
-                raise ValueError("Поле серийного номера не может быть пустым")
-            elif not re.fullmatch(pattern, self.serial.text().strip().replace(',', '', 30)):
-                raise ValueError("Данные поля серийного номера не соответствуют паттерну <<Только числа и запятые>>")
-            # if not self.field_password.text().strip() and self.password.isChecked() is True:
-            #     raise ValueError("Поле пароля не может быть пустым")
         except Exception as e:
-            QMessageBox.warning(
-                self,
-                "Ошибка ввода",
-                f"Ошибка в заполнении формы: {e}"
-            )
+            QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
             return
-        if self.thread and self.thread.isRunning():
+
+        # Проверяем, запущен ли уже поток выгрузки
+        if hasattr(self, 'log_thread') and self.log_thread and self.log_thread.isRunning():
             return
 
         self.read.setEnabled(False)
-        # self.analisys.setEnabled(False)
-        self.thread = WorkerThread(self, self.read_log)
-        self.thread.finished.connect(self.on_read_finished)
-        self.thread.error.connect(self.on_error)
-        self.thread.start()
+        self.log_thread = WorkerThread(self, self.read_log)
+        self.log_thread.finished.connect(self.on_log_thread_finished)
+        self.log_thread.error.connect(self.on_error)
+        self.log_thread.start()
 
     def start_analysis_thread(self):
         # options = QFileDialog.Options()
@@ -308,38 +324,35 @@ class UiForLogLoader(QWidget):
 
     def start_read_meter_data(self):
         try:
-            # pattern = r'\d{1,60}'
             if not self.com.text().strip():
                 raise ValueError("Поле COM не может быть пустым")
-            # if not self.baud.text().strip():
-            #     raise ValueError("Поле скорости соединения не может быть пустым")
-            # if not self.serial.text().strip():
-            #     raise ValueError("Поле серийного номера не может быть пустым")
-            # elif not re.fullmatch(pattern, self.serial.text().strip().replace(',', '', 30)):
-            #     raise ValueError("Данные поля серийного номера не соответствуют паттерну <<Только числа и запятые>>")
-            # if not self.field_password.text().strip() and self.password.isChecked() is True:
-            #     raise ValueError("Поле пароля не может быть пустым")
         except Exception as e:
-            QMessageBox.warning(
-                self,
-                "Ошибка ввода",
-                f"Ошибка в заполнении формы: {e}"
-            )
+            QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
             return
-        if self.thread and self.thread.isRunning():
+
+        # Проверяем, запущен ли уже поток опроса
+        if hasattr(self, 'meter_thread') and self.meter_thread and self.meter_thread.isRunning():
             return
 
         self.read.setEnabled(False)
-        # self.analisys.setEnabled(False)
-        self.thread = WorkerThread(self, self.read_meter_data)
-        self.thread.finished.connect(self.on_read_finished)
-        self.thread.error.connect(self.on_error)
-        self.thread.start()
+        self.meter_thread = WorkerThread(self, self.read_meter_data_task)
+        self.meter_thread.finished.connect(self.on_meter_thread_finished)
+        self.meter_thread.error.connect(self.on_error)
+        self.meter_thread.start()
 
-    def on_read_finished(self, result):
-        self.read.setEnabled(True)
-        # self.analisys.setEnabled(True)
-        self.thread = None
+    def on_meter_thread_finished(self, result):
+        self.meter_thread = None
+        self.check_threads_and_enable_button()
+
+    def on_log_thread_finished(self, result):
+        self.log_thread = None
+        self.check_threads_and_enable_button()
+
+    def check_threads_and_enable_button(self):
+        """Разблокирует кнопку, если оба потока завершены"""
+        if (not hasattr(self, 'meter_thread') or self.meter_thread is None or not self.meter_thread.isRunning()) and \
+                (not hasattr(self, 'log_thread') or self.log_thread is None or not self.log_thread.isRunning()):
+            self.read.setEnabled(True)
 
     def on_analysis_finished(self, result):
         self.analisys.setEnabled(True)

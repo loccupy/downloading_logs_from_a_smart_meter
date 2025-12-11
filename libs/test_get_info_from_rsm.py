@@ -1,5 +1,6 @@
 import pytest
 import requests
+import urllib3
 
 headers = {
     'Content-Type': 'application/json; charset=utf-8'
@@ -33,6 +34,8 @@ def get_stand(cookies):
 
 
 def get_serial_numbers():
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     cookies = get_token()
     stands = get_stand(cookies)
     id_stand = stands['Стенд №3']

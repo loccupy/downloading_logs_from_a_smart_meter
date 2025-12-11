@@ -1423,3 +1423,15 @@ def power_with_scalar(power):
 def write_txt(file_name, text):
     with open(file_name, "a", encoding="utf-8") as f:
         f.write(text)
+
+
+def timer_every_10_minutes():
+    while True:
+        # Получаем текущее время
+        current_time = time.localtime()
+        # Проверяем, если минуты кратны 10
+        if current_time.tm_min % 10 == 0:
+            print("Таймер сработал!")
+        else:
+            # Если не кратно 10, ждем 1 минуту
+            time.sleep(60)

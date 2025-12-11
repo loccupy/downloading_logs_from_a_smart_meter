@@ -1,3 +1,4 @@
+import os
 from time import sleep
 
 from libs.Utils import *
@@ -26,7 +27,7 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
         write_txt(file_name, f'\nТип счетчика >> {device_type}')
         write_txt(file_name, f'\nСерийный номер счетчика >> {serial_number}')
         write_txt(file_name, f'\nРасхождение времени >> {duration} сек.')
-        check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_diagnostic, file_name)
+        message = check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_diagnostic, file_name)
         write_txt(file_name, f"Тип счетчика и серийный номер с прибора учета успешно считаны!!!\n")
 
         close_reader(reader)
@@ -34,6 +35,7 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
         print(f'Тип счетчика >> {device_type}')
         print(f'Серийный номер счетчика >> {serial_number}')
         print(f'Расхождение времени >> {duration}')
+        print(message)
         print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
 
         if attempt != 1:
@@ -63,7 +65,7 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             raise
 
 
-def read_type(config, attempt=1, max_attempts=5):
+def read_type(config, main_directory, attempt=1, max_attempts=5):
     print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...", end='')
     reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
     reader = reader_list[0]
@@ -75,7 +77,16 @@ def read_type(config, attempt=1, max_attempts=5):
         print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
         close_reader(reader)
         time = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
-        file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
+
+        # Создание папки для хранения журналов
+        directory = main_directory + f'/Выгрузка ПУ №[{serial_number}]_{time}'
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        file_name = os.path.join(directory, f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx")
+
+        # file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
         excel_writer = pd.ExcelWriter(file_name)
         return device_type, excel_writer, file_name
     except Exception as e:
@@ -86,6 +97,7 @@ def read_type(config, attempt=1, max_attempts=5):
             sleep(2)  # Ждем 2 секунды перед повторной попыткой
             return read_type(
                 config,
+                main_directory,
                 attempt + 1,
                 max_attempts
             )
@@ -103,7 +115,7 @@ def meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_na
         raise
 
 
-def read_logs(config):
+def read_logs(config, main_directory):
     try:
 
         speeding_up_the_connection(config)
@@ -112,7 +124,7 @@ def read_logs(config):
 
         # all_message = MessageForSending()
 
-        device_type, excel_writer, file_name = read_type(config)
+        device_type, excel_writer, file_name = read_type(config, main_directory)
 
         print(f"\n  СТАРТ СЧИТЫВАНИЯ ЖУРНАЛОВ СЧЕТЧИКА №..{config.serial_number}...")
         # sample = sample_config(config.flag_viborka, config.first_date, config.second_date)

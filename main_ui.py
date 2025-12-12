@@ -230,7 +230,7 @@ class UiForLogLoader(QWidget):
 
                         with open(file_path, 'a', encoding='utf-8') as f:
                             formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
-                            f.write(f'Для файла >> {result[0]}:\n')
+                            f.write(f'\nДля файла >> {result[0]}:\n')
                             f.write(formatted_list + '\n')
 
                         clear_global_list()

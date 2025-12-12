@@ -1,3 +1,5 @@
+import os
+import shutil
 import time
 from datetime import datetime
 
@@ -1425,13 +1427,33 @@ def write_txt(file_name, text):
         f.write(text)
 
 
-def timer_every_10_minutes():
-    while True:
-        # Получаем текущее время
-        current_time = time.localtime()
-        # Проверяем, если минуты кратны 10
-        if current_time.tm_min % 10 == 0:
-            print("Таймер сработал!")
+def copy_data(file):
+    try:
+        source_dir = file
+
+        destination_dir = f'O:/12.Отдел разработки/_ПЕРЕЕЗД_Public/Отдел тестирования/Опрос и Выгрузка'
+
+        # # Получаем имя исходной папки
+        # source_folder_name = os.path.basename(os.path.normpath(source_dir))
+
+        if '.txt' in file:
+            target_path = os.path.join(destination_dir, file)
+            shutil.copy2(file, target_path)
         else:
-            # Если не кратно 10, ждем 1 минуту
-            time.sleep(60)
+            # Формируем путь к целевой подпапке
+            target_path = os.path.join(destination_dir, source_dir)
+
+            # Создаём целевую папку, если её нет
+            os.makedirs(target_path, exist_ok=True)
+
+            # Копируем содержимое source_dir в target_path, дополняя существующее
+            shutil.copytree(
+                source_dir,
+                target_path,
+                dirs_exist_ok=True  # ключевое: сливаем содержимое, не удаляя
+            )
+
+        print(f"Содержимое дополнено:\n  Источник: {source_dir}\n  Назначение: {target_path}")
+    except Exception as e:
+        message_in_out(f'Не удалось копировать данные на диск О:/, ошибка >>> {e}!!!')
+        print(f'Не удалось копировать данные на диск О:/, ошибка >>> {e}!!!')

@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIntValidator, QTextCursor
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
 
-from libs.Utils import timer_every_10_minutes
+from libs.Utils import copy_data
 from libs.check_self_diagnostic_log import CheckSelfDiagnostic
 from libs.check_time import CheckTime
 from libs.config import Config
@@ -168,15 +168,18 @@ class UiForLogLoader(QWidget):
         config = self.get_params()
         time_for_check = CheckTime(list_of_serial)
         time_for_check_self_diagnostic = CheckSelfDiagnostic(list_of_serial)
-        file_name = "Логи_опроса.txt"
-        with open(file_name, "w", encoding="utf-8"):
-            pass
+
         while True:
             current_time = datetime.now()
-            # Проверяем, если минуты кратны 5
-            if current_time.minute % 50 == 0:
+
+            # Проверяем, если минуты кратны 50
+            if (current_time.minute / 10 == 1 or current_time.minute / 40 == 1) and current_time.minute != 0:
+                file_name = f"Логи_опроса_{current_time.strftime("%d.%m.%Y_%H.%M.%S")}.txt"
+                # file_path = os.path.join(main_directory, file_name)
+                with open(file_name, "w", encoding="utf-8"):
+                    pass
                 for serial in list_of_serial:
-                    print(f'\n#####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
+                    print(f'\n{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
                     config.serial_number = int(serial)
                     try:
                         meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
@@ -184,6 +187,7 @@ class UiForLogLoader(QWidget):
                     except Exception as e:
                         print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
                         continue
+                copy_data(file_name)
             # Ждем 1 минуту
             time.sleep(60)
 
@@ -195,23 +199,23 @@ class UiForLogLoader(QWidget):
         config = self.get_params()
         while True:
             current_time = datetime.now()
-            # Проверяем, если минуты кратны 10
-            if current_time.minute % 56 == 0:
-                tm = datetime.now().strftime("%d.%m.%y_%H.%M.%S")
+            # Проверяем, если минуты кратны 56
+            if (current_time.minute / 15 == 1 or current_time.minute / 45 == 1) and current_time.minute != 0:
+                tm = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+
                 main_directory = f'Выгрузка_журналов_{tm}'
 
                 if not os.path.exists(main_directory):
                     os.makedirs(main_directory)
 
-                file_name = f'report.txt'
+                file_name = f'report_{tm}.txt'
                 file_path = os.path.join(main_directory, file_name)
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('')
 
                 for serial in list_of_serial:
 
-
-                    print(f'#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
+                    print(f'{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
                     config.serial_number = int(serial)
                     try:
                         # speeding_up_the_connection(config)
@@ -239,10 +243,9 @@ class UiForLogLoader(QWidget):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                 message_in_out(content)
+                copy_data(main_directory)
 
             sleep(60)
-
-
 
     def analysis(self):
         print(f"\n  СТАРТ АНАЛИЗА ЖУРНАЛОВ...")

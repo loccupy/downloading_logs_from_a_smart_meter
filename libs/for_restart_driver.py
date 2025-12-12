@@ -57,7 +57,10 @@ def install_ch340_windows():
     installer_path = "CH340SER.EXE"
     base_path = resource_path(installer_path)
     print("Запуск установки...")
-    result = subprocess.run(["cmd", "/c", base_path], shell=True, creationflags=subprocess.DETACHED_PROCESS)
+    result = subprocess.run(
+        [base_path, "/S", "/VERYSILENT"],  # тихие режимы
+        creationflags=subprocess.CREATE_NO_WINDOW  # скрытое выполнение
+    )
 
     # Ждем появления окна и нажимаем INSTALL
     try:

@@ -1,5 +1,6 @@
 import time
 
+from libs.for_restart_driver import install_ch340_windows
 from libs.gurux.dlms.objects import GXDLMSData, GXDLMSHdlcSetup
 from libs.GXDLMSReader import GXDLMSReader
 from libs.GXSettings import GXSettings
@@ -117,7 +118,6 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=5):
             )
         else:
             print(f"Превышено количество попыток подключения для ускорения (5). Ошибка: {e}")
-            raise
             # raise  # Перебрасываем исключение после всех попыток
 
 
@@ -171,7 +171,7 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
             )
         else:
             print(f"Превышено количество попыток подключения для сброса скорости (5). Ошибка: {e}")
-            raise
+            # raise
 
 
 def init_connect(reader, settings):
@@ -183,6 +183,7 @@ def init_connect(reader, settings):
     except Exception as e:
         reader.close()
         # print(f"Ошибка при открытии соединения: {e}")
+        install_ch340_windows()
         raise
 
 

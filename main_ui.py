@@ -175,6 +175,7 @@ class UiForLogLoader(QWidget):
             # Проверяем, если минуты кратны 50
             # if (current_time.minute / 10 == 1 or current_time.minute / 40 == 1) and current_time.minute != 0:
             if current_time.minute / 40 == 1:
+            # if current_time.minute % 2 == 0:
                 file_name = f"Логи_опроса_{current_time.strftime("%d.%m.%Y_%H.%M.%S")}.txt"
                 # file_path = os.path.join(main_directory, file_name)
                 with open(file_name, "w", encoding="utf-8"):
@@ -198,6 +199,7 @@ class UiForLogLoader(QWidget):
         # with open('report.txt', 'w', encoding='utf-8') as f:
         #     f.write('')
         config = self.get_params()
+        time_for_sample = CheckSelfDiagnostic(list_of_serial)
         while True:
             current_time = datetime.now()
             # Проверяем, если минуты кратны 56
@@ -221,7 +223,7 @@ class UiForLogLoader(QWidget):
                     try:
                         # speeding_up_the_connection(config)
 
-                        result = read_logs(config, main_directory)
+                        result = read_logs(config, main_directory, time_for_sample)
 
                         self.file_name = result
 

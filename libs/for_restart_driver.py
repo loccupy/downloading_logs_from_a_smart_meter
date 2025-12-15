@@ -7,6 +7,8 @@ import win32ui
 import win32con
 import win32api
 
+from libs.sending_message import message_in_out
+
 
 def find_window(title):
     hwnd = win32gui.FindWindow(None, title)
@@ -77,6 +79,7 @@ def install_ch340_windows():
 
     except Exception as e:
         print(f"❌ Ошибка при установке драйвера: {e}")
+        message_in_out(f"❌ Ошибка при установке драйвера: {e}")
 
 
 if __name__ == "__main__":

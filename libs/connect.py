@@ -4,6 +4,7 @@ from libs.for_restart_driver import install_ch340_windows
 from libs.gurux.dlms.objects import GXDLMSData, GXDLMSHdlcSetup
 from libs.GXDLMSReader import GXDLMSReader
 from libs.GXSettings import GXSettings
+from libs.sending_message import message_in_out
 
 
 def connect_with_ip():
@@ -121,6 +122,37 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=5):
             # raise  # Перебрасываем исключение после всех попыток
 
 
+def check_speed_for_meter_survey(config):
+    print(f"\n   Установка скорости соединения на 9600...")
+    config.baud = 115200
+    reader_list = get_reader(
+        config.com_meter,
+        config.passw,
+        config.serial_number,
+        config.baud
+    )
+
+    reader = reader_list[0]
+    settings = reader_list[1]
+    try:
+        init_connect(reader, settings)
+
+        speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
+        speed.communicationSpeed = 5
+        print("Устанавливаем скорость соединения на RS на 9600...")
+        reader.write(speed, 2)
+        config.baud = 9600
+        close_reader(reader)
+        return None
+    except Exception as e:
+        config.baud = 9600
+        close_reader(reader)
+        print(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+                       f' счетчика №...{config.serial_number} с ошибкой {e}!!!')
+        message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+                       f' счетчика №...{config.serial_number} с ошибкой {e}!!!')
+
+
 def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
     print(f"\n   Возвращаем скорость к дефолтному состоянию...")
     reader_list = get_reader(
@@ -170,6 +202,8 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
                 max_attempts
             )
         else:
+            message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+                           f' счетчика №...{config.serial_number}!!!')
             print(f"Превышено количество попыток подключения для сброса скорости (5). Ошибка: {e}")
             # raise
 

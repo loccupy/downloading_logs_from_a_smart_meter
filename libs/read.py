@@ -48,6 +48,8 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             print(f"Попытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}")
             write_txt(file_name,
                       f"\nПопытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}\n")
+            write_txt(file_name, f"\nЗапускаю проверку скорости соединения при опросе...\n")
+            check_speed_for_meter_survey(config)
             print(f"Повторяем попытку через 2 секунды...")
             sleep(2)  # Ждем 2 секунды перед повторной попыткой
             return read_data(
@@ -115,19 +117,13 @@ def meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_na
         raise
 
 
-def read_logs(config, main_directory):
+def read_logs(config, main_directory, sample):
     try:
-
         speeding_up_the_connection(config)
-
-        sample = ['N']
-
-        # all_message = MessageForSending()
 
         device_type, excel_writer, file_name = read_type(config, main_directory)
 
         print(f"\n  СТАРТ СЧИТЫВАНИЯ ЖУРНАЛОВ СЧЕТЧИКА №..{config.serial_number}...")
-        # sample = sample_config(config.flag_viborka, config.first_date, config.second_date)
 
         reader = config
 

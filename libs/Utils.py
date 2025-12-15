@@ -1352,8 +1352,10 @@ def parse_log_name(log_name):
 
 def range_by_date(reader, data, sample):
     if sample[0] not in ['N', 'n']:
-        start = GXDateTime(f'{sample[0]} 00:00:00', "%d.%m.%Y %H:%M:%S")
-        end = GXDateTime(f'{sample[1]} 23:59:59', "%d.%m.%Y %H:%M:%S")
+        # start = GXDateTime(f'{sample[0]} 00:00:00', "%d.%m.%Y %H:%M:%S")
+        # end = GXDateTime(f'{sample[1]} 23:59:59', "%d.%m.%Y %H:%M:%S")
+        start = sample[0]
+        end = sample[1]
         logs = reader.read_rows_by_range(data, start, end)
     else:
         logs = reader.read(data, 2)

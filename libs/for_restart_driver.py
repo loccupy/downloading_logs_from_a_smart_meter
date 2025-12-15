@@ -46,6 +46,7 @@ def close_window(hwnd):
 import os
 import sys
 
+
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
@@ -56,16 +57,13 @@ def resource_path(relative_path):
 
 
 def install_ch340_windows():
-    installer_path = "CH340SER.EXE"
-    base_path = resource_path(installer_path)
-    print("Запуск установки...")
-    result = subprocess.run(
-        [base_path, "/S", "/VERYSILENT"],  # тихие режимы
-        creationflags=subprocess.CREATE_NO_WINDOW  # скрытое выполнение
-    )
-
     # Ждем появления окна и нажимаем INSTALL
     try:
+        installer_path = "CH340SER.EXE"
+        base_path = resource_path(installer_path)
+        print("Запуск установки...")
+        result = subprocess.run([base_path, "/S", "/VERYSILENT"],  # тихие режимы
+                                creationflags=subprocess.CREATE_NO_WINDOW)  # скрытое выполнение
         window_1 = wait_for_window("DriverSetup(X64)")
         click_button(window_1, "INSTALL")
         time.sleep(2)  # Ждем завершения установки
@@ -84,4 +82,3 @@ def install_ch340_windows():
 
 if __name__ == "__main__":
     install_ch340_windows()
-

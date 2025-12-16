@@ -175,7 +175,7 @@ class UiForLogLoader(QWidget):
             # Проверяем, если минуты кратны 50
             # if (current_time.minute / 10 == 1 or current_time.minute / 40 == 1) and current_time.minute != 0:
             # if current_time.minute / 40 == 1:
-            if current_time.minute == 42:
+            if current_time.minute == 5:
                 file_name = f"Логи_опроса_{current_time.strftime("%d.%m.%Y_%H.%M.%S")}.txt"
                 # file_path = os.path.join(main_directory, file_name)
                 with open(file_name, "w", encoding="utf-8"):
@@ -204,7 +204,7 @@ class UiForLogLoader(QWidget):
             current_time = datetime.now()
             # Проверяем, если минуты кратны 56
             # if current_time.minute / 45 == 1:
-            if current_time.minute == 45:
+            if current_time.minute == 10:
                 tm = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
 
                 main_directory = f'Выгрузка_журналов_{tm}'
@@ -233,9 +233,10 @@ class UiForLogLoader(QWidget):
                         self.analysis()
 
                         with open(file_path, 'a', encoding='utf-8') as f:
-                            formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
-                            f.write(f'\nДля файла >> {result[0]}:\n')
-                            f.write(formatted_list + '\n')
+                            if len(global_list) != 0:
+                                formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
+                                f.write(f'\nДля файла >> {result[0]}:\n')
+                                f.write(formatted_list + '\n')
 
                         clear_global_list()
                         print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
@@ -246,7 +247,10 @@ class UiForLogLoader(QWidget):
                 # print(for_report)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                message_in_out(content)
+                if not content:
+                    message_in_out(f'При выгрузке журналов ошибок не обнаружено! Время: {current_time.strftime("%A, %d %B %Y")}')
+                else:
+                    message_in_out(content)
                 copy_data(main_directory)
 
             sleep(60)

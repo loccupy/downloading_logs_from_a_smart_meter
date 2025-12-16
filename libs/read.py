@@ -67,13 +67,14 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             raise
 
 
-def read_type(config, main_directory, attempt=1, max_attempts=5):
+def read_type(config, main_directory, check_sample, attempt=1, max_attempts=5):
     print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...", end='')
     reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
     reader = reader_list[0]
     settings = reader_list[1]
     try:
         init_connect(reader, settings)
+        sample = sample_config(config, reader, check_sample)
         device_type = reader.deviceType
         serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
         print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
@@ -90,7 +91,7 @@ def read_type(config, main_directory, attempt=1, max_attempts=5):
 
         # file_name = f"Номер_[{serial_number[-5:]}]_тип_[{device_type}]_{time}.xlsx"
         excel_writer = pd.ExcelWriter(file_name)
-        return device_type, excel_writer, file_name
+        return device_type, excel_writer, file_name, sample
     except Exception as e:
         close_reader(reader)
         if attempt < max_attempts:
@@ -100,6 +101,7 @@ def read_type(config, main_directory, attempt=1, max_attempts=5):
             return read_type(
                 config,
                 main_directory,
+                check_sample,
                 attempt + 1,
                 max_attempts
             )
@@ -117,11 +119,11 @@ def meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_na
         raise
 
 
-def read_logs(config, main_directory, sample):
+def read_logs(config, main_directory, check_sample):
     try:
         speeding_up_the_connection(config)
 
-        device_type, excel_writer, file_name = read_type(config, main_directory)
+        device_type, excel_writer, file_name, sample = read_type(config, main_directory, check_sample)
 
         print(f"\n  СТАРТ СЧИТЫВАНИЯ ЖУРНАЛОВ СЧЕТЧИКА №..{config.serial_number}...")
 

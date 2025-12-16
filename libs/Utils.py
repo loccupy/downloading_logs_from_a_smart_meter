@@ -1259,11 +1259,8 @@ def create_sheet_in_excel_file(data, writer, sheet_name, config, check_sample, a
 
         init_connect(reader, settings)
 
-        sample = sample_config(config, reader, check_sample, sheet_name)
-        # sample = 'N'
-
         # Сохраняем данные в Excel
-        data(reader, sample).to_excel(
+        data(reader, check_sample).to_excel(
             writer,
             sheet_name=sheet_name,
             index=False
@@ -1319,21 +1316,21 @@ def is_valid_date_for_anal(date_string):
         return False
 
 
-def sample_config(config, reader, time_for_sample, sheet_name):
+def sample_config(config, reader, time_for_sample):
     try:
         current_time = datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)), "%m/%d/%y %H:%M:%S")
         key = config.serial_number
         if time_for_sample.get_start_time(key) is None:
             time_for_sample.set_start_time(key, current_time)
             # write_txt(file_name, f"\nСтарт отчетного периода для журнала {sheet_name}!!!\n")
-            print(f"Старт отчетного периода для выгрузки журнала {sheet_name}!!!")
+            print(f"Старт отчетного периода для выгрузки журналов!!!")
             return ['N']
         else:
             time_for_sample.set_end_time(key, current_time)
             return [time_for_sample.get_start_time(key), time_for_sample.get_end_time(key)]
     except Exception as e:
-        print(f"Ошибка при установке диапазона выборки {sheet_name} счетчика №...{config.serial_number} >>> {e}!!!!")
-        message_in_out(f"Ошибка при установке диапазона выборки {sheet_name} счетчика №...{config.serial_number} >>> {e}!!!!")
+        print(f"Ошибка при установке диапазона выборки счетчика №...{config.serial_number} >>> {e}!!!!")
+        message_in_out(f"Ошибка при установке диапазона выборки счетчика №...{config.serial_number} >>> {e}!!!!")
         return ['N']
 
 

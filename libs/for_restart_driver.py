@@ -61,7 +61,7 @@ def install_ch340_windows():
     try:
         installer_path = "CH340SER.EXE"
         base_path = resource_path(installer_path)
-        print("Запуск установки...")
+        print("Запуск переустановки драйвера...")
         result = subprocess.run([base_path, "/S", "/VERYSILENT"],  # тихие режимы
                                 creationflags=subprocess.CREATE_NO_WINDOW)  # скрытое выполнение
         window_1 = wait_for_window("DriverSetup(X64)")

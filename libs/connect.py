@@ -119,7 +119,7 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=5):
             )
         else:
             print(f"Превышено количество попыток подключения для ускорения (5). Ошибка: {e}")
-            # raise  # Перебрасываем исключение после всех попыток
+            raise  # Перебрасываем исключение после всех попыток
 
 
 def check_speed_for_meter_survey(config):
@@ -208,7 +208,7 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
             # raise
 
 
-def init_connect(reader, settings):
+def init_connect(reader, settings, attempt=1, max_attempts=3):
     try:
         if not settings.media.isOpen():
             settings.media.open()
@@ -217,8 +217,16 @@ def init_connect(reader, settings):
     except Exception as e:
         reader.close()
         # print(f"Ошибка при открытии соединения: {e}")
-        install_ch340_windows()
-        raise
+        if attempt < max_attempts:
+            print(f"Попытка инициализации соединения {attempt} из {max_attempts} не удалась: {e}")
+            print(f"Повторяем попытку через 2 секунды...")
+            time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            install_ch340_windows()
+            time.sleep(2)
+            return init_connect(reader, settings, attempt + 1, max_attempts)
+        else:
+            print(f"Превышено количество попыток (3). Ошибка: {e}")
+            raise
 
 
 def close_reader(reader):

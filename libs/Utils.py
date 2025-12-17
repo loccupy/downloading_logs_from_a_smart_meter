@@ -5,8 +5,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from libs.connect import init_connect, close_reader, get_reader_with_ip, get_reader
-from libs.gurux.dlms import GXDateTime
+from libs.connect import init_connect, close_reader, get_reader
 from libs.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
 from libs.sending_message import message_in_out
 
@@ -1327,7 +1326,9 @@ def sample_config(config, reader, time_for_sample):
             return ['N']
         else:
             time_for_sample.set_end_time(key, current_time)
-            return [time_for_sample.get_start_time(key), time_for_sample.get_end_time(key)]
+            ran_ge = [time_for_sample.get_start_time(key), time_for_sample.get_end_time(key)]
+            time_for_sample.set_start_time(key,  current_time)
+            return ran_ge
     except Exception as e:
         print(f"Ошибка при установке диапазона выборки счетчика №...{config.serial_number} >>> {e}!!!!")
         message_in_out(f"Ошибка при установке диапазона выборки счетчика №...{config.serial_number} >>> {e}!!!!")

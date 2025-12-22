@@ -186,8 +186,10 @@ class UiForLogLoader(QWidget):
                     try:
                         meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
                         print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
+                        message_in_out(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] УСПЕШНО #####')
                     except Exception as e:
                         print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
+                        message_in_out(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####")
                         continue
                 copy_data(file_name)
             # Ждем 1 минуту
@@ -204,7 +206,7 @@ class UiForLogLoader(QWidget):
             current_time = datetime.now()
             # Проверяем, если минуты кратны 56
             # if current_time.minute / 45 == 1:
-            if current_time.minute == 10:
+            if current_time.minute == 35:
                 tm = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
 
                 main_directory = f'Выгрузка_журналов_{tm}'
@@ -242,15 +244,17 @@ class UiForLogLoader(QWidget):
                         print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
                     except Exception as e:
                         setting_the_speed_to_default_values(config)
+                        with open(file_path, 'a', encoding='utf-8') as f:
+                            f.write(f'\n#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n')
                         print(f"#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
                         continue
                 # print(for_report)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                 if not content:
-                    message_in_out(f'При выгрузке журналов ошибок не обнаружено! Время: {current_time.strftime("%A, %d %B %Y")}')
+                    message_in_out(f'При выгрузке журналов ошибок не обнаружено! Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
                 else:
-                    message_in_out(content)
+                    message_in_out(content + f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
                 copy_data(main_directory)
 
             sleep(60)

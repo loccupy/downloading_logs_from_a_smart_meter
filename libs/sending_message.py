@@ -35,4 +35,4 @@ def message_in_out(string):
         #                 chat_id=-1003021280639)
 
     except Exception as e:
-        print(f"Невозможно отправить сообщение в телегу, ошибка {e.args}")
+        print(f"Невозможно отправить сообщение в телегу, ошибка >> {e}")

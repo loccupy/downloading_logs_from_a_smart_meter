@@ -1436,8 +1436,12 @@ def power_with_scalar(power):
 
 
 def write_txt(file_name, text):
-    with open(file_name, "a", encoding="utf-8") as f:
-        f.write(text)
+    try:
+        with open(file_name, "a", encoding="utf-8") as f:
+            f.write(text)
+    except Exception as e:
+        print(f"Ошибка при записи данных в txt файл {file_name} при опросе >> {e}")
+        message_in_out(f"Ошибка при записи данных в txt файл {file_name} при опросе >> {e}")
 
 
 def copy_data(file):

@@ -175,7 +175,7 @@ class UiForLogLoader(QWidget):
             # Проверяем, если минуты кратны 50
             # if (current_time.minute / 10 == 1 or current_time.minute / 40 == 1) and current_time.minute != 0:
             # if current_time.minute / 40 == 1:
-            if current_time.minute == 5:
+            if current_time.minute == 20:
                 file_name = f"Логи_опроса_{current_time.strftime("%d.%m.%Y_%H.%M.%S")}.txt"
                 # file_path = os.path.join(main_directory, file_name)
                 with open(file_name, "w", encoding="utf-8"):

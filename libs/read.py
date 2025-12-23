@@ -8,7 +8,7 @@ from libs.connect import *
 from libs.sending_message import message_in_out
 
 
-def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,  attempt=1, max_attempts=5):
+def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,  attempt=1, max_attempts=3):
     print(f"\nПровожу опрос счетчика №[...{config.serial_number}]...", end='')
 
     write_txt(file_name, f"\nПровожу опрос счетчика №[...{config.serial_number}]...")

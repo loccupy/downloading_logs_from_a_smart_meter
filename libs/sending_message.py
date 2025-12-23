@@ -29,10 +29,10 @@ def message_in_out(string):
                         chat_id=218940403)
 
         # Отправить в чат Тестировочная
-        # telegram = get_notifier('telegram')
-        # telegram.notify(message=string,
-        #                 token='7938367301:AAFXCHUuNB3VCuB1Xl7BAISUY7kLpMXAp7o',
-        #                 chat_id=-1003021280639)
+        telegram = get_notifier('telegram')
+        telegram.notify(message=string,
+                        token='7938367301:AAFXCHUuNB3VCuB1Xl7BAISUY7kLpMXAp7o',
+                        chat_id=-1003021280639)
 
     except Exception as e:
         print(f"Невозможно отправить сообщение в телегу, ошибка >> {e}")

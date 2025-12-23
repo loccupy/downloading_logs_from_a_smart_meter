@@ -217,7 +217,7 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
             # raise
 
 
-def init_connect(reader, settings, attempt=1, max_attempts=3):
+def init_connect(reader, settings, attempt=1, max_attempts=2):
     try:
         if not settings.media.isOpen():
             settings.media.open()
@@ -225,17 +225,17 @@ def init_connect(reader, settings, attempt=1, max_attempts=3):
         reader.initializeConnection()
     except Exception as e:
         reader.close()
-        if attempt <= max_attempts:
+        if attempt < max_attempts:
             print(f"Попытка инициализации соединения {attempt} из {max_attempts} не удалась: {e}")
 
-            if attempt == 2:
+            if attempt == 1:
                 install_ch340_windows()
 
             time.sleep(2)
             print(f"Повторяем попытку через 2 секунды...")
             return init_connect(reader, settings, attempt + 1, max_attempts)
         else:
-            print(f"Превышено количество попыток при открытии соединения (3). Ошибка: {e}")
+            print(f"Превышено количество попыток при открытии соединения (2). Ошибка: {e}")
             raise
 
 

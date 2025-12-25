@@ -1,13 +1,12 @@
 import os
-import re
 import sys
-import time
 from copy import copy
 from datetime import datetime
+from pathlib import Path
 from time import sleep
 
 from PyQt5 import uic, QtWidgets
-from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
+from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread, QTimer
 from PyQt5.QtGui import QIntValidator, QTextCursor
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
 
@@ -35,8 +34,9 @@ class WorkerThread(QThread):
     def run(self):
         try:
             result = self.method(*self.args, **self.kwargs)
-            self.finished.emit(result)
+            self.finished.emit(str(result))
         except Exception as e:
+            print(f"Ошибка в потоке: {e}")
             self.error.emit(str(e))
 
 
@@ -44,220 +44,197 @@ class EmittingStream(QObject):
     textWritten = pyqtSignal(str)
 
     def write(self, text):
-        self.textWritten.emit(str(text))
+        if text and text.strip():
+            self.textWritten.emit(text.strip() + '\n')
 
     def flush(self):
-        pass  # Необходимо для совместимости с sys.stdout
+        pass
 
 
 class UiForLogLoader(QWidget):
     def __init__(self):
         super().__init__()
+        self.timer_2 = None
+        self.timer_1 = None
+        self.list_of_serial = []
         self.ip = None
         self.second_date = None
         self.first_date = None
-        self.flag_viborka = None
-        self.flag_temperatyre = None
+        self.flag_viborka = False
+        self.flag_temperature = False
         self.serial_number = None
         self.baud_rate = None
-        self.com_port = None
         self.settings = None
         self.reader = None
         self.initUI()
         self.object_connect = None
-        self.thread = None
+        self.meter_thread = None
+        self.read_log_thread = None
+        self.analysis_thread = None
         self.file_name = None
         self.file_names = []
 
     def initUI(self):
-        current_dir = os.path.dirname(__file__)
-        ui_path = os.path.join(current_dir, 'libs', 'maket_mass.ui')
+        current_dir = Path(__file__).parent
+        ui_path = current_dir / "libs" / "maket_mass.ui"
 
-        uic.loadUi(ui_path, self)
+        if not ui_path.exists():
+            print(f"UI-файл не найден: {ui_path}")
+            raise FileNotFoundError(f"UI-файл не найден: {ui_path}")
 
-        # self.port = self.findChild(QtWidgets.QLineEdit, 'port')
-        # self.port.setValidator(QIntValidator())
-        # self.port.setMaxLength(5)
+        uic.loadUi(str(ui_path), self)
 
         self.serial = self.findChild(QtWidgets.QLineEdit, 'serial')
-        # self.serial.setValidator(QIntValidator())
-        # self.serial.setMaxLength(4)
 
         self.com = self.findChild(QtWidgets.QLineEdit, 'com')
         self.com.setValidator(QIntValidator())
         self.com.setMaxLength(2)
 
-        # self.field_password = self.findChild(QtWidgets.QLineEdit, 'field_password')
-        # self.field_password.setEnabled(False)
-        # self.field_password.setMaxLength(16)
-
-        # self.password = self.findChild(QtWidgets.QCheckBox, 'password')
-        #
-        # self.password.stateChanged.connect(self.update_password_field)
-
-        # self.checkbox_temperature = self.findChild(QtWidgets.QCheckBox, 'temperature')
-        # self.checkbox_viborka = self.findChild(QtWidgets.QCheckBox, 'viborka')
-
-        # self.end_date = self.findChild(QtWidgets.QDateTimeEdit, 'end_date')
-        # self.end_date.setEnabled(False)
-        # self.start_date = self.findChild(QtWidgets.QDateTimeEdit, 'start_date')
-        # self.start_date.setEnabled(False)
-
-        # self.checkbox_viborka.stateChanged.connect(
-        #     lambda state: self.toggle_fields(state, self.start_date, self.end_date)
-        # )
-
         self.read = self.findChild(QtWidgets.QPushButton, 'read')
-        # self.read.clicked.connect(self.read_log)
-
-        # self.analisys = self.findChild(QtWidgets.QPushButton, 'analisys')
-        # self.analisys.clicked.connect(self.analysis)
 
         self.text_edit = self.findChild(QtWidgets.QTextEdit, 'textEdit')
         self.text_edit.setReadOnly(True)  # Запрещаем редактирование
-        # self.text_edit.setFixedSize(880, 450)
-        self.redirect_stdout()
+        # self.text_edit.setFixedSize(880, 450),
+
+        self.stream = EmittingStream()
+        sys.stdout = self.stream
+        sys.stderr = self.stream
         self.stream.textWritten.connect(self.on_text_written)
 
         # Применение темной темы
         self.applyDarkTheme()
 
+        # Загрузка серийных номеров
+        self.load_serial_numbers()
+
         self.read.clicked.connect(self.start_read_meter_data)
         self.read.clicked.connect(self.start_read_log_thread)
-        # self.analisys.clicked.connect(self.start_analysis_thread)
+
+    def load_serial_numbers(self):
+        try:
+            self.list_of_serial = get_serial_numbers()
+            print(f"Загружено {len(self.list_of_serial)} серийных номеров")
+        except Exception as e:
+            print(f"Не удалось получить серийные номера: {e}")
+            self.list_of_serial = []
 
     def get_params(self):
         try:
-            self.com_meter = self.com.text()
-            # self.port_number = str(self.port.text())
-            # self.serial_number = int(serial)
-            # self.passw = self.field_password.text()
-            # if self.password.isChecked() is False:
-            #     self.passw = '1234567898765432'
-            # self.flag_temperatyre = self.checkbox_temperature.isChecked()
-            # self.flag_viborka = self.checkbox_viborka.isChecked()
-            # self.first_date = self.start_date.text()
-            # self.second_date = self.end_date.text()
-            config = Config(self.com_meter, None, '1234567898765432', self.flag_temperatyre,
+            com = self.com.text().strip()
+            if not com or not com.isdigit():
+                raise ValueError("Поле COM должно быть непустым числом")
+
+            config = Config(com, None, '1234567898765432', self.flag_temperature,
                             self.flag_viborka, self.first_date, self.second_date)
             return config
         except Exception as e:
-            print(f"Ошибка при считывании данных из полей >> {e}")
+            print(f"Ошибка при получении параметров: {e}")
             raise
 
-    def get_list_of_serial_numbers(self):
-        try:
-            list_of_serial = [i.strip() for i in self.serial.text().split(',')]
+    # def get_list_of_serial_numbers(self):
+    #     try:
+    #         list_of_serial = [i.strip() for i in self.serial.text().split(',')]
+    #
+    #         return list_of_serial
+    #     except Exception as e:
+    #         print(f"Не удалось идентифицировать введенные серийные номера с ошибкой {e}!!!")
+    #         return []
+    #
+    # def get_list_of_serial_numbers_from_api(self):
+    #     try:
+    #         list_of_serial = get_serial_numbers()
+    #
+    #         return list_of_serial
+    #     except Exception as e:
+    #         print(f"Не удалось получить серийные номера по api запросу с ошибкой {e}!!!")
+    #         raise
 
-            return list_of_serial
-        except Exception as e:
-            print(f"Не удалось идентифицировать введенные серийные номера с ошибкой {e}!!!")
-            return []
+    # def read_meter_data_task(self):
+    #     list_of_serial = self.get_list_of_serial_numbers_from_api()
+    #     config = self.get_params()
+    #     time_for_check = CheckTime(list_of_serial)
+    #     time_for_check_self_diagnostic = CheckSelfDiagnostic(list_of_serial)
+    #
+    #     while True:
+    #         current_time = datetime.now()
+    #
+    #         # Проверяем, если минуты кратны 50
+    #         # if (current_time.minute / 10 == 1 or current_time.minute / 40 == 1) and current_time.minute != 0:
+    #         # if current_time.minute / 40 == 1:
+    #         if current_time.minute == 20:
+    #             file_name = f"Логи_опроса_{current_time.strftime("%d.%m.%Y_%H.%M.%S")}.txt"
+    #             # file_path = os.path.join(main_directory, file_name)
+    #             with open(file_name, "w", encoding="utf-8"):
+    #                 pass
+    #             for serial in list_of_serial:
+    #                 print(f'\n{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
+    #                 config.serial_number = int(serial)
+    #                 try:
+    #                     meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
+    #                     print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
+    #                     message_in_out(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] УСПЕШНО #####')
+    #                 except Exception as e:
+    #                     print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
+    #                     message_in_out(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####")
+    #                     continue
+    #             copy_data(file_name)
+    #         # Ждем 1 минуту
+    #         time.sleep(60)
 
-    def get_list_of_serial_numbers_from_api(self):
-        try:
-            list_of_serial = get_serial_numbers()
-
-            return list_of_serial
-        except Exception as e:
-            print(f"Не удалось получить серийные номера по api запросу с ошибкой {e}!!!")
-            raise
-
-    def read_meter_data_task(self):
-        list_of_serial = self.get_list_of_serial_numbers_from_api()
-        config = self.get_params()
-        time_for_check = CheckTime(list_of_serial)
-        time_for_check_self_diagnostic = CheckSelfDiagnostic(list_of_serial)
-
-        while True:
-            current_time = datetime.now()
-
-            # Проверяем, если минуты кратны 50
-            # if (current_time.minute / 10 == 1 or current_time.minute / 40 == 1) and current_time.minute != 0:
-            # if current_time.minute / 40 == 1:
-            if current_time.minute == 20:
-                file_name = f"Логи_опроса_{current_time.strftime("%d.%m.%Y_%H.%M.%S")}.txt"
-                # file_path = os.path.join(main_directory, file_name)
-                with open(file_name, "w", encoding="utf-8"):
-                    pass
-                for serial in list_of_serial:
-                    print(f'\n{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
-                    config.serial_number = int(serial)
-                    try:
-                        meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
-                        print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
-                        message_in_out(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] УСПЕШНО #####')
-                    except Exception as e:
-                        print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
-                        message_in_out(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####")
-                        continue
-                copy_data(file_name)
-            # Ждем 1 минуту
-            time.sleep(60)
-
-    def read_log(self):
-        list_of_serial = self.get_list_of_serial_numbers_from_api()
+    def read_log(self,  time_for_sample):
+        # list_of_serial = self.get_list_of_serial_numbers_from_api()
         for_report = []
         # with open('report.txt', 'w', encoding='utf-8') as f:
         #     f.write('')
         config = self.get_params()
-        time_for_sample = CheckSelfDiagnostic(list_of_serial)
-        while True:
-            current_time = datetime.now()
-            # Проверяем, если минуты кратны 56
-            # if current_time.minute / 45 == 1:
-            if current_time.minute == 35:
-                tm = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+        # time_for_sample = CheckSelfDiagnostic(self.list_of_serial)
 
-                main_directory = f'Выгрузка_журналов_{tm}'
+        current_time = datetime.now()
 
-                if not os.path.exists(main_directory):
-                    os.makedirs(main_directory)
+        tm = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
 
-                file_name = f'report_{tm}.txt'
-                file_path = os.path.join(main_directory, file_name)
-                with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write('')
+        main_directory = f'Выгрузка_журналов_{tm}'
 
-                for serial in list_of_serial:
+        if not os.path.exists(main_directory):
+            os.makedirs(main_directory)
 
-                    print(f'{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
-                    config.serial_number = int(serial)
-                    try:
-                        # speeding_up_the_connection(config)
+        file_name = f'report_{tm}.txt'
+        file_path = os.path.join(main_directory, file_name)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write('')
 
-                        result = read_logs(config, main_directory, time_for_sample)
+        for serial in self.list_of_serial:
 
-                        self.file_name = result
+            print(f'{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
+            config.serial_number = int(serial)
+            try:
+                result = read_logs(config, main_directory, time_for_sample)
 
-                        # setting_the_speed_to_default_values(config)
+                self.file_name = result
 
-                        self.analysis()
+                self.analysis()
 
-                        with open(file_path, 'a', encoding='utf-8') as f:
-                            if len(global_list) != 0:
-                                formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
-                                f.write(f'\nДля файла >> {result[0]}:\n')
-                                f.write(formatted_list + '\n')
+                with open(file_path, 'a', encoding='utf-8') as f:
+                    if len(global_list) != 0:
+                        formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
+                        f.write(f'\nДля файла >> {result[0]}:\n')
+                        f.write(formatted_list + '\n')
 
-                        clear_global_list()
-                        print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
-                    except Exception as e:
-                        setting_the_speed_to_default_values(config)
-                        with open(file_path, 'a', encoding='utf-8') as f:
-                            f.write(f'\n#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n')
-                        print(f"#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
-                        continue
-                # print(for_report)
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                if not content:
-                    message_in_out(f'При выгрузке журналов ошибок не обнаружено! Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
-                else:
-                    message_in_out(content + f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
-                copy_data(main_directory)
-
-            sleep(60)
+                clear_global_list()
+                print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
+            except Exception as e:
+                setting_the_speed_to_default_values(config)
+                with open(file_path, 'a', encoding='utf-8') as f:
+                    f.write(f'\n#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n')
+                print(f"#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
+                continue
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        if not content:
+            message_in_out(f'При выгрузке журналов ошибок не обнаружено! Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+        else:
+            message_in_out(content + f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+        copy_data(main_directory)
 
     def analysis(self):
         print(f"\n  СТАРТ АНАЛИЗА ЖУРНАЛОВ...")
@@ -296,6 +273,23 @@ class UiForLogLoader(QWidget):
         except Exception as e:
             print(f"Ошибка при анализе {e}")
 
+    # def start_read_log_thread(self):
+    #     try:
+    #         if not self.com.text().strip():
+    #             raise ValueError("Поле COM не может быть пустым")
+    #     except Exception as e:
+    #         QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
+    #         return
+    #
+    #     self.time_for_check_2 = CheckTime(self.list_of_serial)
+    #     self.time_for_check_self_diagnostic_2 = CheckSelfDiagnostic(self.list_of_serial)
+    #
+    #     self.read.setEnabled(False)
+    #     self.log_thread = WorkerThread(self, self.read_log)
+    #     self.log_thread.finished.connect(self.on_log_thread_finished)
+    #     self.log_thread.error.connect(self.on_error)
+    #     self.log_thread.start()
+
     def start_read_log_thread(self):
         try:
             if not self.com.text().strip():
@@ -304,38 +298,54 @@ class UiForLogLoader(QWidget):
             QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
             return
 
-        # Проверяем, запущен ли уже поток выгрузки
-        if hasattr(self, 'log_thread') and self.log_thread and self.log_thread.isRunning():
-            return
+        # self.time_for_check_2 = CheckTime(self.list_of_serial)
+        self.sample = CheckSelfDiagnostic(self.list_of_serial)
 
-        self.read.setEnabled(False)
-        self.log_thread = WorkerThread(self, self.read_log)
-        self.log_thread.finished.connect(self.on_log_thread_finished)
-        self.log_thread.error.connect(self.on_error)
-        self.log_thread.start()
+        if self.timer_1 is None:
+            self.timer_1 = QTimer()
+            self.timer_1.timeout.connect(self.check_and_run_read_log_task)
+            self.timer_1.start(60000)  # Проверка каждые 60 секунд
 
-    def start_analysis_thread(self):
-        # options = QFileDialog.Options()
-        # options |= QFileDialog.ReadOnly
-        #
-        # filename, _ = QFileDialog.getOpenFileName(
-        #     self,
-        #     "Выберите файл",
-        #     "",
-        #     "Файлы Excel (*.xlsx)",
-        #     options=options
-        # )
-        # if filename:
-        #     self.file_name = filename
-        # if self.thread and self.thread.isRunning():
-        #     return
+        # Запуск сразу, если условие выполняется
+        self.check_and_run_read_log_task()
 
-        self.analisys.setEnabled(False)
-        self.read.setEnabled(False)
-        self.thread = WorkerThread(self, self.analysis)
-        self.thread.finished.connect(self.on_analysis_finished)
-        self.thread.error.connect(self.on_error)
-        self.thread.start()
+    def check_and_run_read_log_task(self):
+        current_time = datetime.now()
+        if current_time.minute == 5 and not self.is_read_log_thread_running():
+            self.run_read_log_task()
+
+    def is_read_log_thread_running(self):
+        return self.read_log_thread is not None and self.read_log_thread.isRunning()
+
+    def run_read_log_task(self):
+        self.read_log_thread = WorkerThread(
+            self,
+            self.read_log,
+            self.sample
+        )
+        self.read_log_thread.finished.connect(self.on_log_thread_finished)
+        self.read_log_thread.error.connect(self.on_error)
+        self.read_log_thread.start()
+
+    def read_meter_data_task(self, time_for_check, time_for_check_self_diagnostic):
+        config = self.get_params()
+        current_time = datetime.now()
+        file_name = f"Логи_опроса_{current_time.strftime('%d.%m.%Y_%H.%M.%S')}.txt"
+
+        with open(file_name, "w", encoding="utf-8") as f:
+            f.write("")
+
+        for serial in self.list_of_serial:
+            print(f"Опрос счётчика №[...{serial}]")
+            config.serial_number = int(serial)
+            try:
+                meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
+                print(f"Опрос счётчика №[...{serial}] завершён")
+                message_in_out(f"Опрос счётчика №[...{serial}] успешно")
+            except Exception as e:
+                print(f"Ошибка при опросе счётчика №{serial}: {e}")
+                message_in_out(f"Ошибка при опросе счётчика №...{serial}: {e}")
+        copy_data(file_name)
 
     def start_read_meter_data(self):
         try:
@@ -345,12 +355,32 @@ class UiForLogLoader(QWidget):
             QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
             return
 
-        # Проверяем, запущен ли уже поток опроса
-        if hasattr(self, 'meter_thread') and self.meter_thread and self.meter_thread.isRunning():
-            return
+        self.time_for_check_1 = CheckTime(self.list_of_serial)
+        self.time_for_check_self_diagnostic_1 = CheckSelfDiagnostic(self.list_of_serial)
 
-        self.read.setEnabled(False)
-        self.meter_thread = WorkerThread(self, self.read_meter_data_task)
+        if self.timer_2 is None:
+            self.timer_2 = QTimer()
+            self.timer_2.timeout.connect(self.check_and_run_meter_task)
+            self.timer_2.start(60000)  # Проверка каждые 60 секунд
+
+        # Запуск сразу, если условие выполняется
+        self.check_and_run_meter_task()
+
+    def check_and_run_meter_task(self):
+        current_time = datetime.now()
+        if current_time.minute == 0 and not self.is_meter_thread_running():
+            self.run_meter_task()
+
+    def is_meter_thread_running(self):
+        return self.meter_thread is not None and self.meter_thread.isRunning()
+
+    def run_meter_task(self):
+        self.meter_thread = WorkerThread(
+            self,
+            self.read_meter_data_task,
+            self.time_for_check_1,
+            self.time_for_check_self_diagnostic_1
+        )
         self.meter_thread.finished.connect(self.on_meter_thread_finished)
         self.meter_thread.error.connect(self.on_error)
         self.meter_thread.start()
@@ -360,13 +390,19 @@ class UiForLogLoader(QWidget):
         self.check_threads_and_enable_button()
 
     def on_log_thread_finished(self, result):
-        self.log_thread = None
+        self.read_log_thread = None
         self.check_threads_and_enable_button()
 
     def check_threads_and_enable_button(self):
-        """Разблокирует кнопку, если оба потока завершены"""
-        if (not hasattr(self, 'meter_thread') or self.meter_thread is None or not self.meter_thread.isRunning()) and \
-                (not hasattr(self, 'log_thread') or self.log_thread is None or not self.log_thread.isRunning()):
+        """Разблокирует кнопку, если все потоки завершены"""
+        threads_running = [
+            self.meter_thread and self.meter_thread.isRunning(),
+            self.read_log_thread and self.read_log_thread.isRunning(),
+            self.analysis_thread and self.analysis_thread
+
+            and self.analysis_thread.isRunning()
+        ]
+        if not any(threads_running):
             self.read.setEnabled(True)
 
     def on_analysis_finished(self, result):
@@ -376,19 +412,14 @@ class UiForLogLoader(QWidget):
 
     def on_error(self, error_message):
         self.read.setEnabled(True)
-        self.analisys.setEnabled(True)
-        self.thread = None
+        if self.meter_thread:
+            self.meter_thread = None
+        if self.read_log_thread:
+            self.read_log_thread = None
+        if self.analysis_thread:
+            self.analysis_thread = None
+
         self.update_text(f"Произошла ошибка: {error_message}\n")
-
-    def update_password_field(self, state):
-        self.field_password.setEnabled(state == Qt.Checked)
-        if not state:  # Если чекбокс отключен, очищаем поле
-            self.field_password.clear()
-
-    def toggle_fields(self, state, start_date, end_date):
-        is_checked = (state == Qt.Checked)
-        start_date.setEnabled(is_checked)
-        end_date.setEnabled(is_checked)
 
     def update_text(self, text):
         self.text_edit.append(text)
@@ -445,6 +476,25 @@ class UiForLogLoader(QWidget):
 
         # Применяем стиль к приложению
         self.setStyleSheet(dark_stylesheet)
+
+    def closeEvent(self, event):
+        print("Закрытие приложения, остановка потоков...")
+
+        # Останавливаем таймеры
+        if self.timer_1 and self.timer_1.isActive():
+            self.timer_1.stop()
+        if self.timer_2 and self.timer_2.isActive():
+            self.timer_2.stop()
+
+        # Завершаем все потоки
+        threads_to_stop = [self.meter_thread, self.read_log_thread, self.analysis_thread]
+        for thread in threads_to_stop:
+            if thread and thread.isRunning():
+                thread.quit()
+                thread.wait(2000)  # Ждём до 2 секунд
+
+        super().closeEvent(event)
+        print("Приложение закрыто")
 
 
 def start_ui():

@@ -4,16 +4,14 @@ from libs.gurux.dlms.objects import GXDLMSClock
 from libs.sending_message import message_in_out
 
 
-def check_time(config, reader, time_for_check):
+def check_time(config, current_time, time_for_check):
     try:
         if time_for_check.get_time(config.serial_number) is None:
-            time_for_check.set_time(config.serial_number,
-                                    datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)),
-                                                      "%m/%d/%y %H:%M:%S"))
+            time_for_check.set_time(config.serial_number, current_time)
             time_for_check.start_timer(config.serial_number)
             duration = 'Не рассчитывается на первом круге'
         else:
-            current_time = datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)), "%m/%d/%y %H:%M:%S")
+            current_time = current_time
             duration = (current_time - time_for_check.get_time(config.serial_number) -
                         time_for_check.get_timer(config.serial_number)).total_seconds()
             time_for_check.set_time(config.serial_number, current_time)

@@ -21,8 +21,9 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
 
         device_type = reader.deviceType
         serial_number = reader.read(GXDLMSData('0.0.96.1.0.255'), 2).decode('utf-8')
+        current_time = datetime.strptime(str(reader.read(GXDLMSClock('0.0.1.0.0.255'), 2)), "%m/%d/%y %H:%M:%S")
 
-        duration = check_time(config, reader, time_for_check)
+        duration = check_time(config, current_time, time_for_check)
 
         write_txt(file_name, f'\nТип счетчика >> {device_type}')
         write_txt(file_name, f'\nСерийный номер счетчика >> {serial_number}')
@@ -35,7 +36,8 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
         print(f'Тип счетчика >> {device_type}')
         print(f'Серийный номер счетчика >> {serial_number}')
         print(f'Расхождение времени >> {duration}')
-        print(message)
+        if message:
+            print(message)
         print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
 
         if attempt != 1:
@@ -48,8 +50,12 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             print(f"Попытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}")
             write_txt(file_name,
                       f"\nПопытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}\n")
-            write_txt(file_name, f"\nЗапускаю проверку скорости соединения при опросе...\n")
-            check_speed_for_meter_survey(config)
+
+            if attempt == 1:
+                write_txt(file_name, f"\nЗапускаю проверку скорости соединения при опросе...\n")
+                check_speed_for_meter_survey(config)
+            else:
+                install_ch340_windows()
             print(f"Повторяем попытку через 2 секунды...")
             sleep(2)  # Ждем 2 секунды перед повторной попыткой
             return read_data(
@@ -107,7 +113,7 @@ def read_type(config, main_directory, check_sample, attempt=1, max_attempts=5):
             )
         else:
             print(f"Превышено количество попыток подключения при считывании типа счетчика (5). Ошибка: {e}")
-            raise
+            raise Exception(f"Превышено количество попыток подключения при считывании типа счетчика (5). Ошибка: {e}")
 
 
 # meter survey

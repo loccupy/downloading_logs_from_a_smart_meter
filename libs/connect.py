@@ -148,6 +148,7 @@ def check_speed_for_meter_survey(config):
         return None
     except Exception as e:
         close_reader(reader)
+        config.baud = 9600
         print(f'Не удалось привести скорость передачи данных к дефолтному значению для'
                        f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
         message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
@@ -169,7 +170,7 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
 
         # Определение типа интерфейса
         data = GXDLMSData('0.0.96.12.4.255')
-        val = reader.read(data, 2)
+        # val = reader.read(data, 2)
 
         speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
         old_speed = reader.read(speed, 2)
@@ -224,19 +225,7 @@ def init_connect(reader, settings, attempt=1, max_attempts=2):
 
         reader.initializeConnection()
     except Exception as e:
-        reader.close()
-        if attempt < max_attempts:
-            print(f"Попытка инициализации соединения {attempt} из {max_attempts} не удалась: {e}")
-
-            if attempt == 1:
-                install_ch340_windows()
-
-            time.sleep(2)
-            print(f"Повторяем попытку через 2 секунды...")
-            return init_connect(reader, settings, attempt + 1, max_attempts)
-        else:
-            print(f"Превышено количество попыток при открытии соединения (2). Ошибка: {e}")
-            raise
+        raise Exception(f"Ошибка при инициализации соединения >> {e}")
 
 
 def close_reader(reader):

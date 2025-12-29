@@ -1,6 +1,5 @@
 import time
 
-from libs.for_restart_driver import install_ch340_windows
 from libs.gurux.dlms.objects import GXDLMSData, GXDLMSHdlcSetup
 from libs.GXDLMSReader import GXDLMSReader
 from libs.GXSettings import GXSettings
@@ -51,7 +50,7 @@ def get_reader_with_ip(ip, password, serial_number, port):
     return reader, settings
 
 
-def speeding_up_the_connection(config, attempt=1, max_attempts=5):
+def speeding_up_the_connection(config, attempt=1, max_attempts=3):
     print(f"\n   Увеличиваем скорость передачи данных...")
     reader_list = get_reader(
         config.com_meter,
@@ -155,7 +154,7 @@ def check_speed_for_meter_survey(config):
                        f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
 
 
-def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
+def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
     print(f"\n   Возвращаем скорость к дефолтному состоянию для счетчика №[...{config.serial_number}]...")
     reader_list = get_reader(
         config.com_meter,

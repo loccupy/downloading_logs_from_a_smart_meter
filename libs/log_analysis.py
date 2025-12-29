@@ -3,7 +3,6 @@ from datetime import timedelta
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
-from openpyxl.reader.excel import load_workbook
 from openpyxl.styles import PatternFill
 
 from libs.Utils import is_valid_date_for_anal, parse_log_name
@@ -11,21 +10,6 @@ from libs.Utils import is_valid_date_for_anal, parse_log_name
 pink_fill = PatternFill(start_color='FFCC99FF',
                         end_color='FFCC99FF',
                         fill_type='solid')
-
-
-# считать excel gegefe
-def read_excel(path_to_file):
-    try:
-        sheets = load_workbook(path_to_file)
-
-        # analysis_correct_date_ref(sheets, 'Журнал напряжения')
-        # time_ordering_analysis_ref(sheets, 'Журнал коммуникационных событий')
-        # ipu_working_hours_ref(sheets, 'Журнал напряжения')
-
-        sheets.save(path_to_file)
-
-    except Exception as e:
-        raise
 
 
 # анализирует "Время фиксации записи" на предмет невалидных дат, FFF-ок
@@ -307,7 +291,7 @@ def checking_for_repeated_ref(sheets, log_name):
 
 
 # проверяет очередность валидных дат в столбце "Время фиксации записи" в срезе мгновенных значений
-def time_ordering_analysis_for_artur_profile(sheets, log_name):
+def time_ordering_analysis_with_minutes(sheets, log_name, time):
     format_dt = "%d.%m.%y %H:%M:%S"
     try:
         sheet = sheets[log_name]
@@ -333,7 +317,7 @@ def time_ordering_analysis_for_artur_profile(sheets, log_name):
                 delta = (datetime.datetime.strptime(str(cell_1.value), format_dt) -
                          datetime.datetime.strptime(str(cell_0.value), format_dt))
                 # Проверяем условие
-                if delta != timedelta(minutes=30):
+                if delta != timedelta(minutes=time):
                     cell_0.fill = pink_fill
                     sleep(0.1)
                     cell_1.fill = pink_fill
@@ -342,88 +326,7 @@ def time_ordering_analysis_for_artur_profile(sheets, log_name):
                     print(
                         f"Некорректная разница во времени фиксации записей в строчках {cell_0.row}-{cell_1.row} в"
                         f" '{parse_log_name(log_name)}'")
-            cell_0 = row[0]
-    except Exception as e:
-        raise f"Ошибка {e} при анализе 'Время фиксации записи' в {parse_log_name(log_name)}"
 
-
-# проверяет очередность валидных дат в столбце "Время фиксации записи" в профиле энергии за интервал 1
-def time_ordering_analysis_for_integration_interval_1(sheets, log_name):
-    format_dt = "%d.%m.%y %H:%M:%S"
-    try:
-        sheet = sheets[log_name]
-        column = None
-        column_names = [cell for cell in sheet[1]]
-        # Получаем номер столбца по названию
-        for i in column_names:
-            if i.value == 'Время фиксации записи':
-                column = i.column
-                break
-
-        # Проверяем все значения столбца и, в случае совпадения условия, перекрашиваем ячейку
-        for i, row in enumerate(sheet.iter_rows(min_row=2, min_col=column, max_col=column)):
-            # Получаем и сохраняем первую ячейку + пропускаем ее для обработки
-            if i == 0:
-                cell_0 = row[0]
-                continue
-
-            # Получаем ячейку
-            cell_1 = row[0]
-
-            if is_valid_date_for_anal(str(cell_0.value)) and is_valid_date_for_anal(str(cell_1.value)):
-                delta = (datetime.datetime.strptime(str(cell_1.value), format_dt) -
-                         datetime.datetime.strptime(str(cell_0.value), format_dt))
-                # Проверяем условие
-                if delta != timedelta(minutes=30):
-                    cell_0.fill = pink_fill
-                    sleep(0.1)
-                    cell_1.fill = pink_fill
-                    sleep(0.1)
-
-                    print(
-                        f"Некорректная разница во времени фиксации записей в строчках {cell_0.row}-{cell_1.row} в"
-                        f" '{parse_log_name(log_name)}'")
-            cell_0 = row[0]
-    except Exception as e:
-        raise f"Ошибка {e} при анализе 'Время фиксации записи' в {parse_log_name(log_name)}"
-
-
-# проверяет очередность валидных дат в столбце "Время фиксации записи" в профиле энергии за интервал 2
-def time_ordering_analysis_for_integration_interval_2(sheets, log_name):
-    format_dt = "%d.%m.%y %H:%M:%S"
-    try:
-        sheet = sheets[log_name]
-        column = None
-        column_names = [cell for cell in sheet[1]]
-        # Получаем номер столбца по названию
-        for i in column_names:
-            if i.value == 'Время фиксации записи':
-                column = i.column
-                break
-
-        # Проверяем все значения столбца и, в случае совпадения условия, перекрашиваем ячейку
-        for i, row in enumerate(sheet.iter_rows(min_row=2, min_col=column, max_col=column)):
-            # Получаем и сохраняем первую ячейку + пропускаем ее для обработки
-            if i == 0:
-                cell_0 = row[0]
-                continue
-
-            # Получаем ячейку
-            cell_1 = row[0]
-
-            if is_valid_date_for_anal(str(cell_0.value)) and is_valid_date_for_anal(str(cell_1.value)):
-                delta = (datetime.datetime.strptime(str(cell_1.value), format_dt) -
-                         datetime.datetime.strptime(str(cell_0.value), format_dt))
-                # Проверяем условие
-                if delta != timedelta(minutes=60):
-                    cell_0.fill = pink_fill
-                    sleep(0.1)
-                    cell_1.fill = pink_fill
-                    sleep(0.1)
-
-                    print(
-                        f"Некорректная разница во времени фиксации записей в строчках {cell_0.row}-{cell_1.row} в"
-                        f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise f"Ошибка {e} при анализе 'Время фиксации записи' в {parse_log_name(log_name)}"

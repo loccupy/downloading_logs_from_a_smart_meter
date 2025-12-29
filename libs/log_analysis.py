@@ -14,21 +14,6 @@ pink_fill = PatternFill(start_color='FFCC99FF',
                         fill_type='solid')
 
 
-# считать excel бля\ть
-def read_excel(path_to_file):
-    try:
-        sheets = load_workbook(path_to_file)
-
-        # analysis_correct_date_ref(sheets, 'Журнал напряжения')
-        # time_ordering_analysis_ref(sheets, 'Журнал коммуникационных событий')
-        # ipu_working_hours_ref(sheets, 'Журнал напряжения')
-
-        sheets.save(path_to_file)
-
-    except Exception as e:
-        raise
-
-
 # анализирует "Время фиксации записи" на предмет невалидных дат, FFF-ок
 def analysis_correct_date_ref(sheets, log_name):
     try:
@@ -351,6 +336,9 @@ def time_ordering_analysis_for_artur_profile(sheets, log_name):
 
                     print(
                         f"Некорректная разница во времени фиксации записей в строчках {cell_0.row}-{cell_1.row} в"
+                        f" '{parse_log_name(log_name)}'")
+                    add_to_global_list(
+                        f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
                         f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:

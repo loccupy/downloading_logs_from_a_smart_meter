@@ -2,7 +2,8 @@ from openpyxl.reader.excel import load_workbook
 
 from libs.log_analysis import ipu_working_hours_ref, analysis_correct_date_ref, time_ordering_analysis_ref, \
     time_ordering_analysis_for_daily_profile, time_ordering_analysis_for_month_profile, checkForSelfDiagnostics, \
-    checking_for_repeated_on_or_offs, time_ordering_analysis_for_artur_profile
+    checking_for_repeated_on_or_offs, time_ordering_analysis_for_artur_profile, \
+    time_ordering_analysis_for_integration_interval_1, time_ordering_analysis_for_integration_interval_2
 
 
 def current_log_analysis(path_to_file):
@@ -310,6 +311,7 @@ def energy_profile_for_1_log_analysis(path_to_file):
         print("Анализ журнала Профиль энергии за инт. 1...")
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
+        time_ordering_analysis_for_integration_interval_1(sheets, log_name)
 
         sheets.save(path_to_file)
 
@@ -325,6 +327,7 @@ def energy_profile_for_2_log_analysis(path_to_file):
         print("Анализ журнала Профиль энергии за инт. 2...")
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
+        time_ordering_analysis_for_integration_interval_2(sheets, log_name)
 
         sheets.save(path_to_file)
 

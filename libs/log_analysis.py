@@ -7,25 +7,11 @@ from openpyxl.reader.excel import load_workbook
 from openpyxl.styles import PatternFill
 
 from libs.Utils import is_valid_date_for_anal, parse_log_name
+from libs.sending_message import add_to_global_list
 
 pink_fill = PatternFill(start_color='FFCC99FF',
                         end_color='FFCC99FF',
                         fill_type='solid')
-
-
-# считать excel gegefe
-def read_excel(path_to_file):
-    try:
-        sheets = load_workbook(path_to_file)
-
-        # analysis_correct_date_ref(sheets, 'Журнал напряжения')
-        # time_ordering_analysis_ref(sheets, 'Журнал коммуникационных событий')
-        # ipu_working_hours_ref(sheets, 'Журнал напряжения')
-
-        sheets.save(path_to_file)
-
-    except Exception as e:
-        raise
 
 
 # анализирует "Время фиксации записи" на предмет невалидных дат, FFF-ок
@@ -48,6 +34,7 @@ def analysis_correct_date_ref(sheets, log_name):
                 cell.fill = pink_fill
                 sleep(0.1)
                 print(f"Невалидная дата в строчке {cell.row} в '{parse_log_name(log_name)}'")
+                add_to_global_list(f"Невалидная дата в строчке {cell.row} в '{parse_log_name(log_name)}'")
     except Exception as e:
         raise f"Ошибка {e} при анализе 'Время фиксации записи' на последовательность в {parse_log_name(log_name)}"
 
@@ -87,6 +74,8 @@ def time_ordering_analysis_ref(sheets, log_name):
                     print(
                         f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
                         f" '{parse_log_name(log_name)}'")
+                    add_to_global_list(f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
+                        f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise f"Ошибка {e} при анализе 'Время фиксации записи' на валидность в {parse_log_name(log_name)}"
@@ -118,6 +107,8 @@ def ipu_working_hours_ref(sheets, log_name):
                 sleep(0.1)
                 print(f"Некорректный тип данных 'Время работы ПУ' в ячейке {cell_1.row} в"
                       f" '{parse_log_name(log_name)}'")
+                add_to_global_list(f"Некорректный тип данных 'Время работы ПУ' в ячейке {cell_1.row} в"
+                      f" '{parse_log_name(log_name)}'")
                 continue
             else:
                 res = int(cell_1.value) - int(cell_0.value)
@@ -130,6 +121,8 @@ def ipu_working_hours_ref(sheets, log_name):
                     sleep(0.1)
 
                     print(f"Некорректная последовательность 'Время работы ПУ' в строчках {cell_0.row}-{cell_1.row} в"
+                          f" '{log_name.replace(" ", "е ", 1)}'")
+                    add_to_global_list(f"Некорректная последовательность 'Время работы ПУ' в строчках {cell_0.row}-{cell_1.row} в"
                           f" '{log_name.replace(" ", "е ", 1)}'")
 
                 cell_0 = row[0]
@@ -174,6 +167,8 @@ def time_ordering_analysis_for_daily_profile(sheets, log_name):
                     print(
                         f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
                         f" '{parse_log_name(log_name)}'")
+                    add_to_global_list(f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
+                      f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise f"Ошибка {e} при анализе 'Время фиксации записи' в {parse_log_name(log_name)}"
@@ -216,6 +211,9 @@ def time_ordering_analysis_for_month_profile(sheets, log_name):
                     print(
                         f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
                         f" '{parse_log_name(log_name)}'")
+                    add_to_global_list(
+                        f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
+                        f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise f"Ошибка {e} при анализе 'Время фиксации записи' в {parse_log_name(log_name)}"
@@ -234,7 +232,10 @@ def checkForSelfDiagnostics(sheets, log_name):
                   "15, Система тактирования ядра - ошибка",
                   "17, Система тактирования часов - ошибка",
                   "129, Аппаратный сброс часов реального времени",
-                  "132, Сброс микроконтроллера сторожевым таймером"]
+                  "130, Программный сброс часов реального времени",
+                  "131, Сброс микроконтроллера при просадке напряжения",
+                  "132, Сброс микроконтроллера сторожевым таймером",
+                  "134", "135", "136"]
 
     try:
         sheet = sheets[log_name]
@@ -252,6 +253,9 @@ def checkForSelfDiagnostics(sheets, log_name):
                 row[0].fill = pink_fill
                 sleep(0.1)
                 print(
+                    f"Код ошибки {row[0].value.split(',')[0]} в строчке {row[0].row} в"
+                    f" '{parse_log_name(log_name)}'")
+                add_to_global_list(
                     f"Код ошибки {row[0].value.split(',')[0]} в строчке {row[0].row} в"
                     f" '{parse_log_name(log_name)}'")
 
@@ -293,13 +297,15 @@ def checking_for_repeated_on_or_offs(sheets, log_name):
                 print(
                     f"Повторяется код события в строчках {cell_0.row}-{cell_1.row} в"
                     f" '{parse_log_name(log_name)}'")
+                add_to_global_list(f"Повторяется код события в строчках {cell_0.row}-{cell_1.row} в"
+                    f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:
         raise f"Ошибка {e} при анализе повторных кодов событий в {parse_log_name(log_name)}"
 
 
 # проверяет очередность валидных дат в столбце "Время фиксации записи" в срезе мгновенных значений
-def time_ordering_analysis_for_artur_profile(sheets, log_name):
+def time_ordering_analysis_with_minutes(sheets, log_name, time):
     format_dt = "%d.%m.%y %H:%M:%S"
     try:
         sheet = sheets[log_name]
@@ -325,7 +331,7 @@ def time_ordering_analysis_for_artur_profile(sheets, log_name):
                 delta = (datetime.datetime.strptime(str(cell_1.value), format_dt) -
                          datetime.datetime.strptime(str(cell_0.value), format_dt))
                 # Проверяем условие
-                if delta != timedelta(minutes=30):
+                if delta != timedelta(minutes=time):
                     cell_0.fill = pink_fill
                     sleep(0.1)
                     cell_1.fill = pink_fill
@@ -333,6 +339,9 @@ def time_ordering_analysis_for_artur_profile(sheets, log_name):
 
                     print(
                         f"Некорректная разница во времени фиксации записей в строчках {cell_0.row}-{cell_1.row} в"
+                        f" '{parse_log_name(log_name)}'")
+                    add_to_global_list(
+                        f"Некорректная последовательность фиксации записи в строчках {cell_0.row}-{cell_1.row} в"
                         f" '{parse_log_name(log_name)}'")
             cell_0 = row[0]
     except Exception as e:

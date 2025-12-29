@@ -49,7 +49,7 @@ def get_reader_with_ip(ip, password, serial_number, port):
     return reader, settings
 
 
-def speeding_up_the_connection(config, attempt=1, max_attempts=5):
+def speeding_up_the_connection(config, attempt=1, max_attempts=3):
     print(f"\n   Увеличиваем скорость передачи данных...")
     reader_list = get_reader(
         config.com_meter,
@@ -121,7 +121,7 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=5):
             # raise  # Перебрасываем исключение после всех попыток
 
 
-def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
+def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
     print(f"\n   Возвращаем скорость к дефолтному состоянию...")
     reader_list = get_reader(
         config.com_meter,
@@ -171,7 +171,7 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=5):
             )
         else:
             print(f"Превышено количество попыток подключения для сброса скорости (5). Ошибка: {e}")
-            raise
+            # raise
 
 
 def init_connect(reader, settings):

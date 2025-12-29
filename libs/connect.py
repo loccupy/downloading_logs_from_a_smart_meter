@@ -1,5 +1,6 @@
 import time
 
+from libs.for_restart_driver import install_ch340_windows
 from libs.gurux.dlms.objects import GXDLMSData, GXDLMSHdlcSetup
 from libs.GXDLMSReader import GXDLMSReader
 from libs.GXSettings import GXSettings
@@ -107,6 +108,11 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=3):
         # print(f"Ошибка при ускорении соединения: {e}")
         # raise
         close_reader(reader)
+        if attempt == 1:
+            print(f"\nЗапускаю проверку скорости соединения при выгрузке...\n")
+            check_speed_for_meter_survey(config)
+        else:
+            install_ch340_windows()
         if attempt < max_attempts:
             print(f"Попытка подключения для ускорения {attempt} из {max_attempts} не удалась: {e}")
             print(f"Повторяем попытку через 2 секунды...")

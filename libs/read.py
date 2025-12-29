@@ -5,6 +5,7 @@ from libs.Utils import *
 from libs.check_self_diagnostic_log import check_error_code_in_self_diagnostic_log
 from libs.check_time import check_time
 from libs.connect import *
+from libs.for_restart_driver import install_ch340_windows
 from libs.sending_message import message_in_out
 
 

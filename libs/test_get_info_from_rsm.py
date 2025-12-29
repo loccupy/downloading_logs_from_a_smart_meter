@@ -38,7 +38,7 @@ def get_serial_numbers():
 
     cookies = get_token()
     stands = get_stand(cookies)
-    id_stand = stands['Стенд №3']
+    id_stand = stands['(Авто)стенд №3 ']
 
     response = requests.get(f'https://api.rsm.promenergo.local/api/Cell/Get/ByStandId/{id_stand}',
                             verify=False, headers=headers, cookies=cookies)
@@ -54,8 +54,9 @@ def test_get_serial_number_from_stand():
     cookies = get_token()
 
     stands = get_stand(cookies)
+    print(stands)
 
-    id_stand = stands['Стенд №3']
+    id_stand = stands['(Авто)стенд №3 ']
 
     response = requests.get(f'https://api.rsm.promenergo.local/api/Cell/Get/ByStandId/{id_stand}',
                             verify=False, headers=headers, cookies=cookies)

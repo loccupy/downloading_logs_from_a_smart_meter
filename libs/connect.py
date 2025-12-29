@@ -118,9 +118,10 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=3):
             )
         else:
             print(f"Превышено количество попыток подключения для ускорения (5). Ошибка: {e}")
-            message_in_out(f'Не удалось ускорить передачу данных для'
-                           f' счетчика №[...{config.serial_number}] на этапе ускорения при выгрузке с ошибкой {e}!!!')
-            raise  # Перебрасываем исключение после всех попыток
+            # message_in_out(f'Не удалось ускорить передачу данных для'
+            #                f' счетчика №[...{config.serial_number}] на этапе ускорения при выгрузке с ошибкой {e}!!!')
+            raise Exception(f'Не удалось ускорить передачу данных для'
+                            f' счетчика №[...{config.serial_number}] на этапе ускорения при выгрузке с ошибкой {e}!!!')
 
 
 def check_speed_for_meter_survey(config):
@@ -149,9 +150,9 @@ def check_speed_for_meter_survey(config):
         close_reader(reader)
         config.baud = 9600
         print(f'Не удалось привести скорость передачи данных к дефолтному значению для'
-                       f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
-        message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
-                       f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
+              f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
+        # message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+        #                f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
 
 
 def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
@@ -211,8 +212,8 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
                 max_attempts
             )
         else:
-            message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
-                           f' счетчика №...{config.serial_number} на этапе выгрузки журналов с ошибкой >> {e}!!!')
+            # message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+            #                f' счетчика №...{config.serial_number} на этапе выгрузки журналов с ошибкой >> {e}!!!')
             print(f"Превышено количество попыток подключения для сброса скорости (5). Ошибка: {e}")
             # raise
 

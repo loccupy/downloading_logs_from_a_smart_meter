@@ -74,7 +74,7 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             raise
 
 
-def read_type(config, main_directory, check_sample, attempt=1, max_attempts=5):
+def read_type(config, main_directory, check_sample, attempt=1, max_attempts=3):
     print("\nСчитываю тип счетчика и серийный номер с прибора учета, формирую стартовый excel файл...", end='')
     reader_list = get_reader(config.com_meter, config.passw, config.serial_number, config.baud)
     reader = reader_list[0]

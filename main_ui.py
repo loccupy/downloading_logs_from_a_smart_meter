@@ -182,12 +182,7 @@ class UiForLogLoader(QWidget):
     #         time.sleep(60)
 
     def read_log(self,  time_for_sample):
-        # list_of_serial = self.get_list_of_serial_numbers_from_api()
-        for_report = []
-        # with open('report.txt', 'w', encoding='utf-8') as f:
-        #     f.write('')
         config = self.get_params()
-        # time_for_sample = CheckSelfDiagnostic(self.list_of_serial)
 
         current_time = datetime.now()
 
@@ -231,7 +226,12 @@ class UiForLogLoader(QWidget):
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         if not content:
-            message_in_out(f'При выгрузке журналов ошибок не обнаружено! Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+            message_in_out(f'#Выгрузка\n'
+                           f'При выгрузке журналов ошибок не обнаружено!'
+                           f' Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+            with open(file_path, 'a', encoding='utf-8') as f:
+                f.write(f'При выгрузке журналов ошибок не обнаружено! '
+                        f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
         else:
             message_in_out(content + f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
         copy_data(main_directory)
@@ -273,23 +273,6 @@ class UiForLogLoader(QWidget):
         except Exception as e:
             print(f"Ошибка при анализе {e}")
 
-    # def start_read_log_thread(self):
-    #     try:
-    #         if not self.com.text().strip():
-    #             raise ValueError("Поле COM не может быть пустым")
-    #     except Exception as e:
-    #         QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
-    #         return
-    #
-    #     self.time_for_check_2 = CheckTime(self.list_of_serial)
-    #     self.time_for_check_self_diagnostic_2 = CheckSelfDiagnostic(self.list_of_serial)
-    #
-    #     self.read.setEnabled(False)
-    #     self.log_thread = WorkerThread(self, self.read_log)
-    #     self.log_thread.finished.connect(self.on_log_thread_finished)
-    #     self.log_thread.error.connect(self.on_error)
-    #     self.log_thread.start()
-
     def start_read_log_thread(self):
         try:
             if not self.com.text().strip():
@@ -330,16 +313,34 @@ class UiForLogLoader(QWidget):
         with open(file_name, "w", encoding="utf-8") as f:
             f.write("")
 
+        all_successful = True
+        error_messages = []
+
         for serial in self.list_of_serial:
             print(f"Опрос счётчика №[...{serial}]")
             config.serial_number = int(serial)
             try:
                 meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
                 print(f"Опрос счётчика №[...{serial}] завершён")
-                message_in_out(f"Опрос счётчика №[...{serial}] успешно")
+                # message_in_out(f"Опрос счётчика №[...{serial}] успешно")
             except Exception as e:
-                print(f"Ошибка при опросе счётчика №{serial}: {e}")
-                message_in_out(f"Ошибка при опросе счётчика №...{serial}: {e}")
+                error_msg = f"Ошибка при опросе счётчика №...{serial}: {e}"
+                print(error_msg)
+                error_messages.append(error_msg)
+                all_successful = False
+            sleep(1)
+        if all_successful:
+            message_in_out(f"#Опрос\n"
+                           f"Опрос счетчиков - успешно.\n"
+                           f"Время выполнения - {current_time.strftime('%d.%m.%Y_%H.%M.%S')}")
+        else:
+            full_error_message = "\n".join(error_messages)
+            message_in_out(
+                f"#Опрос\n"
+                f"Опрос счётчиков завершён с ошибками!!!\n"
+                f"{full_error_message}\n"
+                f"Время выполнения — {current_time.strftime('%d.%m.%Y_%H.%M.%S')}"
+            )
         copy_data(file_name)
 
     def start_read_meter_data(self):
@@ -363,12 +364,12 @@ class UiForLogLoader(QWidget):
 
     def check_and_run_read_log_task(self):
         current_time = datetime.now()
-        if current_time.minute == 15 and not self.is_read_log_thread_running():
+        if current_time.hour == 12 and not self.is_read_log_thread_running():
             self.run_read_log_task()
 
     def check_and_run_meter_task(self):
         current_time = datetime.now()
-        if current_time.minute == 10 and not self.is_meter_thread_running():
+        if current_time.minute == 55 and not self.is_meter_thread_running():
             self.run_meter_task()
 
     def is_meter_thread_running(self):

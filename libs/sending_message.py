@@ -34,7 +34,7 @@ def message_in_out(string):
         #                 token='7938367301:AAFXCHUuNB3VCuB1Xl7BAISUY7kLpMXAp7o',
         #                 chat_id=-1003021280639)
 
-        # Отправить в чат Тестировочная
+        # Отправить в чат Отчет
         telegram = get_notifier('telegram')
         telegram.notify(message=string,
                         token='7938367301:AAFXCHUuNB3VCuB1Xl7BAISUY7kLpMXAp7o',

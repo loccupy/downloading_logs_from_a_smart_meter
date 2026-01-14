@@ -54,17 +54,21 @@ def get_ip():
 
     cookies = get_token()
     stands = get_stand(cookies)
-    id_stand = stands['(Авто)стенд №3 ']
+    # print(list(stands.values()))
 
-    response = requests.get(f'https://api.rsm.promenergo.local/api/Cell/Get/ByStandId/{id_stand}',
-                            verify=False, headers=headers, cookies=cookies)
+    # id_stand = stands['(Авто)стенд №3 ']
+    #
+    res = {}
+    for id_stand in list(stands.values()):
+        response = requests.get(f'https://api.rsm.promenergo.local/api/Cell/Get/ByStandId/{id_stand}',
+                                verify=False, headers=headers, cookies=cookies)
 
-    data = response.json()['value']
+        data = response.json()['value']
 
-    res = {i['meter']['serialNumber']: i['comModule']['ipAddress'] for i in data
-           if 'comModule' in i and i['comModule']['ipAddress'] != '-'} # надо добавить проверку на соответствию формату ip вместо != '-'
-
-    print(res)
+        res.update({i['meter']['serialNumber']: i['comModule']['ipAddress'] for i in data
+                    if 'comModule' in i and i['comModule']['ipAddress'] not in ['-', '', 'СК']})  # надо добавить проверку на соответствию формату ip вместо != '-'
+    #
+    # print(res)
     return res
 
 

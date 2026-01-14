@@ -1244,59 +1244,59 @@ EventAccessCode = [(1, "Попытка несанкционированного 
 #         print(f"Ошибка {e} при создании excel файла или считывании '{sheet_name}'")
 
 
-def create_sheet_in_excel_file(data, writer, sheet_name, config, check_sample, attempt=1, max_attempts=3):
-    reader_list = get_reader(
-        config.com_meter,
-        config.passw,
-        config.serial_number,
-        config.baud
-    )
-    reader = reader_list[0]
-    settings = reader_list[1]
-
-    try:
-
-        init_connect(reader, settings)
-
-        # Сохраняем данные в Excel
-        data(reader, check_sample).to_excel(
-            writer,
-            sheet_name=sheet_name,
-            index=False
-        )
-
-        close_reader(reader)
-
-        # Настройка форматирования столбцов
-        sheet1 = writer.sheets[sheet_name]
-        sheet1.set_column('A:A', 23)
-        sheet1.set_column('B:B', 60)
-        sheet1.set_column('C:U', 40)
-
-        # print(f"Успешно создано: {sheet_name}")
-        return None
-
-    except Exception as e:
-        close_reader(reader)
-        if attempt < max_attempts:
-            print(f"Попытка {attempt} из {max_attempts} не удалась: {e}")
-            print(f"Повторяем попытку через 2 секунды...")
-            time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
-            return create_sheet_in_excel_file(
-                data,
-                writer,
-                sheet_name,
-                config,
-                check_sample,
-                attempt + 1,
-                max_attempts
-            )
-        else:
-            print(f"Превышено количество попыток (3). Ошибка: {e}")
-            print(f"Не удалось создать лист '{sheet_name}'")
-            message_in_out(f'Обрыв соединения при выгрузке журнала {sheet_name}')
-            return None
-            # raise  # Перебрасываем исключение после всех попыток
+# def create_sheet_in_excel_file(data, writer, sheet_name, config, check_sample, attempt=1, max_attempts=3):
+#     reader_list = get_reader(
+#         config.com_meter,
+#         config.passw,
+#         config.serial_number,
+#         config.baud
+#     )
+#     reader = reader_list[0]
+#     settings = reader_list[1]
+#
+#     try:
+#
+#         init_connect(reader, settings)
+#
+#         # Сохраняем данные в Excel
+#         data(reader, check_sample).to_excel(
+#             writer,
+#             sheet_name=sheet_name,
+#             index=False
+#         )
+#
+#         close_reader(reader)
+#
+#         # Настройка форматирования столбцов
+#         sheet1 = writer.sheets[sheet_name]
+#         sheet1.set_column('A:A', 23)
+#         sheet1.set_column('B:B', 60)
+#         sheet1.set_column('C:U', 40)
+#
+#         # print(f"Успешно создано: {sheet_name}")
+#         return None
+#
+#     except Exception as e:
+#         close_reader(reader)
+#         if attempt < max_attempts:
+#             print(f"Попытка {attempt} из {max_attempts} не удалась: {e}")
+#             print(f"Повторяем попытку через 2 секунды...")
+#             time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+#             return create_sheet_in_excel_file(
+#                 data,
+#                 writer,
+#                 sheet_name,
+#                 config,
+#                 check_sample,
+#                 attempt + 1,
+#                 max_attempts
+#             )
+#         else:
+#             print(f"Превышено количество попыток (3). Ошибка: {e}")
+#             print(f"Не удалось создать лист '{sheet_name}'")
+#             message_in_out(f'Обрыв соединения при выгрузке журнала {sheet_name}')
+#             return None
+#             # raise  # Перебрасываем исключение после всех попыток
 
 
 def is_valid_date(date_string):

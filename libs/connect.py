@@ -41,9 +41,10 @@ def get_reader(com, password, serial_number, baud):
 
 
 def get_reader_with_ip(ip, password, serial_number, port):
+    serial_number = serial_number[-4:].lstrip('0') or '0'
     settings = GXSettings()
     settings.getParameters(ip, port, password=password, authentication="High",
-                           serverAddress=serial_number + 16,
+                           serverAddress=int(serial_number) + 16,
                            logicalAddress=1, clientAddress=48, baudRate=9600)
     reader = GXDLMSReader(settings.client, settings.media,
                           settings.trace, settings.invocationCounter)
@@ -51,180 +52,180 @@ def get_reader_with_ip(ip, password, serial_number, port):
     return reader, settings
 
 
-def speeding_up_the_connection(config, attempt=1, max_attempts=3):
-    print(f"\n   Увеличиваем скорость передачи данных...")
-    reader_list = get_reader(
-        config.com_meter,
-        config.passw,
-        config.serial_number,
-        config.baud
-    )
-    reader = reader_list[0]
-    settings = reader_list[1]
-    try:
-        init_connect(reader, settings)
-
-        # Определение типа интерфейса
-        data = GXDLMSData('0.0.96.12.4.255')
-        val = reader.read(data, 2)
-
-        if val == 9:
-            print("Интерфейс >> ОПТОПОРТ")
-        else:
-            print("Интерфейс >> RS")
-
-        # Изменение скорости в зависимости от типа интерфейса
-        if val == 18:
-            speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
-            old_speed = reader.read(speed, 2)
-            if old_speed == 5:
-                speed.communicationSpeed = 9
-                print("Ускоряем RS до 115200")
-                reader.write(speed, 2)
-                config.baud = 115200
-        else:
-            speed = GXDLMSHdlcSetup('0.0.22.0.0.255')
-            old_speed = reader.read(speed, 2)
-            if old_speed == 5:
-                speed.communicationSpeed = 6
-                print("Ускоряем ОПТОПОРТ до 19200")
-                reader.write(speed, 2)
-                config.baud = 19200
-
-        new_speed = reader.read(speed, 2)
-        # reader.close()
-
-        # Определение новой скорости
-        list_of_baud = {"5": 9600, "6": 19200, "9": 115200}
-        baud = list_of_baud.get(str(new_speed), 0)
-        if val == 18:
-            print(f"Скорость для нового соединения по RS >> {baud}")
-        else:
-            print(f"Скорость для нового соединения по ОПТОПОРТу >> {baud}")
-
-        close_reader(reader)
-        return baud
-    except Exception as e:
-        # print(f"Ошибка при ускорении соединения: {e}")
-        # raise
-        close_reader(reader)
-        if attempt == 1:
-            print(f"\nЗапускаю проверку скорости соединения при выгрузке...\n")
-            check_speed_for_meter_survey(config)
-        else:
-            install_ch340_windows()
-        if attempt < max_attempts:
-            print(f"Попытка подключения для ускорения {attempt} из {max_attempts} не удалась: {e}")
-            print(f"Повторяем попытку через 2 секунды...")
-            time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
-            return speeding_up_the_connection(
-                config,
-                attempt + 1,
-                max_attempts
-            )
-        else:
-            print(f"Превышено количество попыток подключения для ускорения (5). Ошибка: {e}")
-            # message_in_out(f'Не удалось ускорить передачу данных для'
-            #                f' счетчика №[...{config.serial_number}] на этапе ускорения при выгрузке с ошибкой {e}!!!')
-            raise Exception(f'Не удалось ускорить передачу данных для'
-                            f' счетчика №[...{config.serial_number}] на этапе ускорения при выгрузке с ошибкой {e}!!!')
-
-
-def check_speed_for_meter_survey(config):
-    print(f"\n   Установка скорости соединения на 9600 для опроса счетчика №[...{config.serial_number}]...")
-    config.baud = 115200
-    reader_list = get_reader(
-        config.com_meter,
-        config.passw,
-        config.serial_number,
-        config.baud
-    )
-
-    reader = reader_list[0]
-    settings = reader_list[1]
-    try:
-        init_connect(reader, settings)
-
-        speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
-        speed.communicationSpeed = 5
-        print("Устанавливаем скорость соединения на RS на 9600...")
-        reader.write(speed, 2)
-        config.baud = 9600
-        close_reader(reader)
-        return None
-    except Exception as e:
-        close_reader(reader)
-        config.baud = 9600
-        print(f'Не удалось привести скорость передачи данных к дефолтному значению для'
-              f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
-        # message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
-        #                f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
+# def speeding_up_the_connection(config, attempt=1, max_attempts=3):
+#     print(f"\n   Увеличиваем скорость передачи данных...")
+#     reader_list = get_reader(
+#         config.com_meter,
+#         config.passw,
+#         config.serial_number,
+#         config.baud
+#     )
+#     reader = reader_list[0]
+#     settings = reader_list[1]
+#     try:
+#         init_connect(reader, settings)
+#
+#         # Определение типа интерфейса
+#         data = GXDLMSData('0.0.96.12.4.255')
+#         val = reader.read(data, 2)
+#
+#         if val == 9:
+#             print("Интерфейс >> ОПТОПОРТ")
+#         else:
+#             print("Интерфейс >> RS")
+#
+#         # Изменение скорости в зависимости от типа интерфейса
+#         if val == 18:
+#             speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
+#             old_speed = reader.read(speed, 2)
+#             if old_speed == 5:
+#                 speed.communicationSpeed = 9
+#                 print("Ускоряем RS до 115200")
+#                 reader.write(speed, 2)
+#                 config.baud = 115200
+#         else:
+#             speed = GXDLMSHdlcSetup('0.0.22.0.0.255')
+#             old_speed = reader.read(speed, 2)
+#             if old_speed == 5:
+#                 speed.communicationSpeed = 6
+#                 print("Ускоряем ОПТОПОРТ до 19200")
+#                 reader.write(speed, 2)
+#                 config.baud = 19200
+#
+#         new_speed = reader.read(speed, 2)
+#         # reader.close()
+#
+#         # Определение новой скорости
+#         list_of_baud = {"5": 9600, "6": 19200, "9": 115200}
+#         baud = list_of_baud.get(str(new_speed), 0)
+#         if val == 18:
+#             print(f"Скорость для нового соединения по RS >> {baud}")
+#         else:
+#             print(f"Скорость для нового соединения по ОПТОПОРТу >> {baud}")
+#
+#         close_reader(reader)
+#         return baud
+#     except Exception as e:
+#         # print(f"Ошибка при ускорении соединения: {e}")
+#         # raise
+#         close_reader(reader)
+#         if attempt == 1:
+#             print(f"\nЗапускаю проверку скорости соединения при выгрузке...\n")
+#             check_speed_for_meter_survey(config)
+#         else:
+#             install_ch340_windows()
+#         if attempt < max_attempts:
+#             print(f"Попытка подключения для ускорения {attempt} из {max_attempts} не удалась: {e}")
+#             print(f"Повторяем попытку через 2 секунды...")
+#             time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+#             return speeding_up_the_connection(
+#                 config,
+#                 attempt + 1,
+#                 max_attempts
+#             )
+#         else:
+#             print(f"Превышено количество попыток подключения для ускорения (5). Ошибка: {e}")
+#             # message_in_out(f'Не удалось ускорить передачу данных для'
+#             #                f' счетчика №[...{config.serial_number}] на этапе ускорения при выгрузке с ошибкой {e}!!!')
+#             raise Exception(f'Не удалось ускорить передачу данных для'
+#                             f' счетчика №[...{config.serial_number}] на этапе ускорения при выгрузке с ошибкой {e}!!!')
 
 
-def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
-    print(f"\n   Возвращаем скорость к дефолтному состоянию для счетчика №[...{config.serial_number}]...")
-    reader_list = get_reader(
-        config.com_meter,
-        config.passw,
-        config.serial_number,
-        config.baud
-    )
-    reader = reader_list[0]
-    settings = reader_list[1]
-    try:
-        init_connect(reader, settings)
-
-        # Определение типа интерфейса
-        data = GXDLMSData('0.0.96.12.4.255')
-        # val = reader.read(data, 2)
-
-        speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
-        old_speed = reader.read(speed, 2)
-        if old_speed != 5:
-            speed.communicationSpeed = 5
-            print("Устанавливаем скорость соединения на RS на 9600...")
-            reader.write(speed, 2)
-            config.baud = 9600
-
-        # if val == 18:
-        #     speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
-        #     old_speed = reader.read(speed, 2)
-        #     if old_speed != 5:
-        #         speed.communicationSpeed = 5
-        #         print("Устанавливаем скорость соединения на RS на 9600...")
-        #         reader.write(speed, 2)
-        #         config.baud = 9600
-        # else:
-        #     speed = GXDLMSHdlcSetup('0.0.22.0.0.255')
-        #     old_speed = reader.read(speed, 2)
-        #     if old_speed != 5:
-        #         speed.communicationSpeed = 5
-        #         print("Устанавливаем скорость соединения ОПТОПОРТа на 9600...")
-        #         reader.write(speed, 2)
-        #         config.baud = 9600
-        close_reader(reader)
-        return None
-    except Exception as e:
-        close_reader(reader)
-        # print(f"Не удалось установить скорость на дефолтные значения c ошибкой {e.args}")
-        # raise
-        if attempt < max_attempts:
-            print(f"Попытка подключения для сброса скорости {attempt} из {max_attempts} не удалась: {e}")
-            print(f"Повторяем попытку через 2 секунды...")
-            time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
-            return setting_the_speed_to_default_values(
-                config,
-                attempt + 1,
-                max_attempts
-            )
-        else:
-            # message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
-            #                f' счетчика №...{config.serial_number} на этапе выгрузки журналов с ошибкой >> {e}!!!')
-            print(f"Превышено количество попыток подключения для сброса скорости (5). Ошибка: {e}")
-            # raise
+# def check_speed_for_meter_survey(config):
+#     print(f"\n   Установка скорости соединения на 9600 для опроса счетчика №[...{config.serial_number}]...")
+#     config.baud = 115200
+#     reader_list = get_reader(
+#         config.com_meter,
+#         config.passw,
+#         config.serial_number,
+#         config.baud
+#     )
+#
+#     reader = reader_list[0]
+#     settings = reader_list[1]
+#     try:
+#         init_connect(reader, settings)
+#
+#         speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
+#         speed.communicationSpeed = 5
+#         print("Устанавливаем скорость соединения на RS на 9600...")
+#         reader.write(speed, 2)
+#         config.baud = 9600
+#         close_reader(reader)
+#         return None
+#     except Exception as e:
+#         close_reader(reader)
+#         config.baud = 9600
+#         print(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+#               f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
+#         # message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+#         #                f' счетчика №[...{config.serial_number}] на этапе проверки скорости при опросе с ошибкой {e}!!!')
 
 
-def init_connect(reader, settings, attempt=1, max_attempts=2):
+# def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
+#     print(f"\n   Возвращаем скорость к дефолтному состоянию для счетчика №[...{config.serial_number}]...")
+#     reader_list = get_reader(
+#         config.com_meter,
+#         config.passw,
+#         config.serial_number,
+#         config.baud
+#     )
+#     reader = reader_list[0]
+#     settings = reader_list[1]
+#     try:
+#         init_connect(reader, settings)
+#
+#         # Определение типа интерфейса
+#         data = GXDLMSData('0.0.96.12.4.255')
+#         # val = reader.read(data, 2)
+#
+#         speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
+#         old_speed = reader.read(speed, 2)
+#         if old_speed != 5:
+#             speed.communicationSpeed = 5
+#             print("Устанавливаем скорость соединения на RS на 9600...")
+#             reader.write(speed, 2)
+#             config.baud = 9600
+#
+#         # if val == 18:
+#         #     speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
+#         #     old_speed = reader.read(speed, 2)
+#         #     if old_speed != 5:
+#         #         speed.communicationSpeed = 5
+#         #         print("Устанавливаем скорость соединения на RS на 9600...")
+#         #         reader.write(speed, 2)
+#         #         config.baud = 9600
+#         # else:
+#         #     speed = GXDLMSHdlcSetup('0.0.22.0.0.255')
+#         #     old_speed = reader.read(speed, 2)
+#         #     if old_speed != 5:
+#         #         speed.communicationSpeed = 5
+#         #         print("Устанавливаем скорость соединения ОПТОПОРТа на 9600...")
+#         #         reader.write(speed, 2)
+#         #         config.baud = 9600
+#         close_reader(reader)
+#         return None
+#     except Exception as e:
+#         close_reader(reader)
+#         # print(f"Не удалось установить скорость на дефолтные значения c ошибкой {e.args}")
+#         # raise
+#         if attempt < max_attempts:
+#             print(f"Попытка подключения для сброса скорости {attempt} из {max_attempts} не удалась: {e}")
+#             print(f"Повторяем попытку через 2 секунды...")
+#             time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+#             return setting_the_speed_to_default_values(
+#                 config,
+#                 attempt + 1,
+#                 max_attempts
+#             )
+#         else:
+#             # message_in_out(f'Не удалось привести скорость передачи данных к дефолтному значению для'
+#             #                f' счетчика №...{config.serial_number} на этапе выгрузки журналов с ошибкой >> {e}!!!')
+#             print(f"Превышено количество попыток подключения для сброса скорости (5). Ошибка: {e}")
+#             # raise
+
+
+def init_connect(reader, settings):
     try:
         if not settings.media.isOpen():
             settings.media.open()

@@ -49,22 +49,52 @@ def get_serial_numbers():
     return res
 
 
-@pytest.mark.asd
-def test_get_serial_number_from_stand():
+def get_ip():
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     cookies = get_token()
-
     stands = get_stand(cookies)
-    print(stands)
-
     id_stand = stands['(Авто)стенд №3 ']
 
     response = requests.get(f'https://api.rsm.promenergo.local/api/Cell/Get/ByStandId/{id_stand}',
                             verify=False, headers=headers, cookies=cookies)
 
-    assert response.status_code == 200
-
     data = response.json()['value']
-    res = [i['meter']['serialNumber'][-4:] for i in data if 'meter' in i]
-    #
-    res = [num.lstrip('0') or '0' for num in res]
+
+    res = {i['meter']['serialNumber']: i['comModule']['ipAddress'] for i in data
+           if 'comModule' in i and i['comModule']['ipAddress'] != '-'} # надо добавить проверку на соответствию формату ip вместо != '-'
+
     print(res)
+    return res
+
+
+@pytest.mark.asd
+def test_get_serial_number_from_stand():
+    # cookies = get_token()
+    #
+    # stands = get_stand(cookies)
+    # print('\n', stands)
+    #
+    # id_stand = stands['(Авто)стенд №3 ']
+    #
+    # response = requests.get(f'https://api.rsm.promenergo.local/api/Cell/Get/ByStandId/{id_stand}',
+    #                         verify=False, headers=headers, cookies=cookies)
+
+    # print(response.json(), '\n')
+
+    # data = response.json()['value']
+    # for i in data:
+    #     if 'comModule' in i.keys() and i['comModule']['ipAddress'] != '-':
+    #         # print(i['comModule'])
+    #         # print()
+    #         print(i['comModule']['ipAddress'])
+
+    # assert response.status_code == 200
+    #
+    # data = response.json()['value']
+    # res = [i['meter']['serialNumber'][-4:] for i in data if 'meter' in i]
+    # #
+    # res = [num.lstrip('0') or '0' for num in res]
+    # print(res)
+
+    get_ip()

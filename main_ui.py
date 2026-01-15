@@ -299,6 +299,7 @@ class UiForLogLoader(QWidget):
         error_messages = []
 
         for serial in self.list_of_ip_with_port.keys():
+            print('#########################################################')
             print(f"Опрос счётчика №[...{serial}]")
             config.serial_number = serial
             config.ip = self.list_of_ip_with_port[serial].split(':')[0]
@@ -318,11 +319,13 @@ class UiForLogLoader(QWidget):
                            f"Опрос счетчиков - успешно.\n"
                            f"Время выполнения - {current_time.strftime('%d.%m.%Y_%H.%M.%S')}")
         else:
-            full_error_message = "\n".join(error_messages)
+            full_error_message = "\n\n".join(error_messages)
             message_in_out(
                 f"#Опрос_IP\n"
                 f"Опрос счётчиков завершён с ошибками!!!\n"
+                f"_____________________________________________________________\n"
                 f"{full_error_message}\n"
+                f"_____________________________________________________________\n"
                 f"Время выполнения — {current_time.strftime('%d.%m.%Y_%H.%M.%S')}"
             )
         copy_data(file_name)
@@ -353,7 +356,7 @@ class UiForLogLoader(QWidget):
 
     def check_and_run_meter_task(self):
         current_time = datetime.now()
-        if current_time.minute == 32 and not self.is_meter_thread_running():
+        if current_time.minute == 38 and not self.is_meter_thread_running():
             self.run_meter_task()
 
     def is_meter_thread_running(self):

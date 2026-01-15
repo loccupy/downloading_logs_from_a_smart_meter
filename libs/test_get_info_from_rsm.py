@@ -1,3 +1,5 @@
+import re
+
 import pytest
 import requests
 import urllib3
@@ -65,8 +67,16 @@ def get_ip():
 
         data = response.json()['value']
 
+        pattern = r'''
+                ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}
+                (?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)
+                :
+                (?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])
+                $
+            '''
+
         res.update({i['meter']['serialNumber']: i['comModule']['ipAddress'] for i in data
-                    if 'comModule' in i and i['comModule']['ipAddress'] not in ['-', '', 'СК']})  # надо добавить проверку на соответствию формату ip вместо != '-'
+                    if 'comModule' in i and re.fullmatch(pattern, i['comModule']['ipAddress'], re.VERBOSE) is not None})
     #
     # print(res)
     return res

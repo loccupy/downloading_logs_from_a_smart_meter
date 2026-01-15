@@ -63,6 +63,7 @@ def voltage_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
+        checking_for_repeated_on_or_offs(sheets, log_name)
 
         sheets.save(path_to_file)
 
@@ -244,6 +245,7 @@ def external_influences_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
+        checking_for_repeated_on_or_offs(sheets, log_name)
 
         sheets.save(path_to_file)
 

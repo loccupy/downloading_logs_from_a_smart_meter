@@ -211,7 +211,8 @@ class UiForLogLoader(QWidget):
 
                 with open(file_path, 'a', encoding='utf-8') as f:
                     if len(global_list) != 0:
-                        formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
+                        formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in
+                                                      enumerate(copy(global_list))])
                         f.write(f'\nДля файла >> {result[0]}:\n')
                         f.write(formatted_list + '\n')
 
@@ -233,7 +234,16 @@ class UiForLogLoader(QWidget):
                 f.write(f'При выгрузке журналов ошибок не обнаружено! '
                         f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
         else:
-            message_in_out(content + f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+            message_in_out(f'#Выгрузка\n'
+                           f'При выгрузке журналов обнаружены ошибки!!!')
+            sleep(1)
+            parts = content.split('Для')
+            for part in parts: # надо пропустить первое Для!!!!
+                if part:  # Пропускаем пустые строки
+                    message_in_out('Для' + part)
+                    sleep(1)
+            message_in_out(f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+
         copy_data(main_directory)
 
     def analysis(self):

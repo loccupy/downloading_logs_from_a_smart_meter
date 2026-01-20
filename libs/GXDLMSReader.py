@@ -84,7 +84,7 @@ class GXDLMSReader(GXDLMSDisconnectControl):
         return datetime.now().strftime("%H:%M:%S")
 
     def writeTrace(self, line, level):
-        return
+        pass
         # print(line)
         # self.logFile.write(line + "\n")
 

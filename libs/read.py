@@ -71,7 +71,7 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             print(f"Превышено количество попыток подключения при опросе счетчика (5). Ошибка: {e}")
             message_in_out(f"#Опрос_IP\n Не удалось подключиться к счетчику №...{config.serial_number}!!!")
             write_txt(file_name, f"\n Не удалось подключиться к счетчику №...{config.serial_number}!!!\n")
-            raise
+            raise Exception(f"Превышено количество попыток подключения при опросе счетчика (5). Ошибка: {e}")
 
 
 # def read_type(config, main_directory, check_sample, attempt=1, max_attempts=3):

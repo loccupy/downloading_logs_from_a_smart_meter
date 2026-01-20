@@ -356,7 +356,7 @@ class UiForLogLoader(QWidget):
 
     def check_and_run_meter_task(self):
         current_time = datetime.now()
-        if current_time.minute == 38 and not self.is_meter_thread_running():
+        if current_time.minute == 0 or current_time.minute == 30 and not self.is_meter_thread_running():
             self.run_meter_task()
 
     def is_meter_thread_running(self):

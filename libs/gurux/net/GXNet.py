@@ -201,7 +201,11 @@ class GXNet(IGXMedia):
     def __listenerThread(self, s):
         while s:
             try:
-                data = s.recv(1000)
+                try:
+                    data = s.recv(2500)
+                except ConnectionAbortedError as e:
+                    print("Хуйня ебаная")
+                    raise ConnectionResetError
                 if data:
                     #Convert data to bytearray because 2.7 handles bytes as a
                     #string.

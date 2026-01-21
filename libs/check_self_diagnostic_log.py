@@ -64,12 +64,11 @@ def check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_
                 message = "\n".join(found_errors)
                 # Добавляем разделитель для читаемости
                 full_message = "\n" + message + "\n"
+                message_in_out(full_message)
             else:
                 message = no_error_message
                 full_message = "\n" + message + "\n"
 
-            # Вывод и запись
-            message_in_out(full_message)
             write_txt(file_name, full_message)
 
             time_for_check_self_diagnostic.set_start_time(key, current_time)

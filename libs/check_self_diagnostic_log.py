@@ -46,7 +46,7 @@ def check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_
             errors_set = set(errors_list)
 
             # Шаблон сообщения
-            error_template = "В журнале самодиагностики обнаружен код {}: {}!!!"
+            error_template = "Для счетчика №{} в журнале самодиагностики обнаружен код {}: {}!!!"
             no_error_message = "В журнале самодиагностики аварийного кода не обнаружено."
 
             # Список найденных ошибок
@@ -56,7 +56,7 @@ def check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_
             for code in code_list:
                 if code in errors_set:
                     error_desc = errors_dict.get(code, "описание не найдено")
-                    error_msg = error_template.format(code, error_desc)
+                    error_msg = error_template.format(config.serial_number, code, error_desc)
                     found_errors.append(error_msg)
 
             # Формирование итогового сообщения

@@ -42,14 +42,34 @@ def check_error_code_in_self_diagnostic_log(config, reader, time_for_check_self_
 
             errors_list = list(errors_dict.keys())
 
-            for i in code_list:
-                if i in errors_list:
-                    message_in_out(f'\nВ журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!')
-                    write_txt(file_name, f"\nВ журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!\n")
-                    message = f"В журнале самодиагностики обнаружен код {i}: {errors_dict[i]}!!!"
+            # Преобразуем errors_list в set для ускорения поиска
+            errors_set = set(errors_list)
+
+            # Шаблон сообщения
+            error_template = "Для счетчика №{} в журнале самодиагностики обнаружен код {}: {}!!!"
+            no_error_message = "В журнале самодиагностики аварийного кода не обнаружено."
+
+            # Список найденных ошибок
+            found_errors = []
+
+            # Проверка кодов
+            for code in code_list:
+                if code in errors_set:
+                    error_desc = errors_dict.get(code, "описание не найдено")
+                    error_msg = error_template.format(config.serial_number, code, error_desc)
+                    found_errors.append(error_msg)
+
+            # Формирование итогового сообщения
+            if found_errors:
+                message = "\n".join(found_errors)
+                # Добавляем разделитель для читаемости
+                full_message = "\n" + message + "\n"
+                message_in_out(full_message)
             else:
-                write_txt(file_name, f"\nВ журнале самодиагностики аварийного кода не обнаружено.\n")
-                message =  f"В журнале самодиагностики аварийного кода не обнаружено."
+                message = no_error_message
+                full_message = "\n" + message + "\n"
+
+            write_txt(file_name, full_message)
 
             time_for_check_self_diagnostic.set_start_time(key, current_time)
             return message

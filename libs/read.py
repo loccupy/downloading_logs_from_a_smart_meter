@@ -41,7 +41,7 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
         print("Тип счетчика и серийный номер с прибора учета успешно считаны.")
 
         if attempt != 1:
-            message_in_out(f"#Опрос_IP\n Удалось подключиться к счетчику №[...{config.serial_number}] с {attempt}-ой попытки.")
+            # message_in_out(f"#Опрос_IP\n Удалось подключиться к счетчику №[...{config.serial_number}] с {attempt}-ой попытки.")
             write_txt(file_name, f"\nУдалось подключиться к счетчику №[...{config.serial_number}] с {attempt}-ой попытки.")
         print('#############################')
 
@@ -64,7 +64,7 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             )
         else:
             print(f"Превышено количество попыток подключения при опросе счетчика (5). Ошибка: {e}")
-            message_in_out(f"#Опрос_IP\n Не удалось подключиться к счетчику №...{config.serial_number}!!!")
+            # message_in_out(f"#Опрос_IP\n Не удалось подключиться к счетчику №...{config.serial_number}!!!")
             write_txt(file_name, f"\n Не удалось подключиться к счетчику №...{config.serial_number}!!!\n")
             raise Exception(f"Превышено количество попыток подключения при опросе счетчика (5). Ошибка: {e}")
 

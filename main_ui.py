@@ -55,11 +55,11 @@ class UiForLogLoader(QWidget):
 
         uic.loadUi(str(ui_path), self)
 
-        self.serial = self.findChild(QtWidgets.QLineEdit, 'serial')
-
-        self.com = self.findChild(QtWidgets.QLineEdit, 'com')
-        self.com.setValidator(QIntValidator())
-        self.com.setMaxLength(2)
+        # self.serial = self.findChild(QtWidgets.QLineEdit, 'serial')
+        #
+        # self.com = self.findChild(QtWidgets.QLineEdit, 'com')
+        # self.com.setValidator(QIntValidator())
+        # self.com.setMaxLength(2)
 
         self.read = self.findChild(QtWidgets.QPushButton, 'read')
 
@@ -142,12 +142,14 @@ class UiForLogLoader(QWidget):
             sleep(1)
         if all_successful:
             message_in_out(f"#Опрос_IP\n"
+                           f"С RSM загружено {len(self.list_of_ip_with_port)} ip адреса.\n"
                            f"Опрос счетчиков - успешно.\n"
                            f"Время выполнения - {current_time.strftime('%d.%m.%Y_%H.%M.%S')}")
         else:
             full_error_message = "\n\n".join(error_messages)
             message_in_out(
                 f"#Опрос_IP\n"
+                f"С RSM загружено {len(self.list_of_ip_with_port)} ip адреса.\n"
                 f"Опрос счётчиков завершён с ошибками!!!\n"
                 f"_____________________________________________________________\n"
                 f"{full_error_message}\n"

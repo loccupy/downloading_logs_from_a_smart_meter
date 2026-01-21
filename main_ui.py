@@ -163,6 +163,8 @@ class UiForLogLoader(QWidget):
         copy_data(file_name)
 
     def start_read_meter_data(self):
+        self.read.setEnabled(False)
+        print("Программа запущена...")
         self.time_for_check_1 = CheckTime(self.list_of_serial)
         self.time_for_check_self_diagnostic_1 = CheckSelfDiagnostic(self.list_of_serial)
 

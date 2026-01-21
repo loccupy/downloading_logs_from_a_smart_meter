@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>550</width>
-    <height>452</height>
+    <height>443</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -31,112 +31,11 @@
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
-  <widget class="QGroupBox" name="groupBox">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>531</width>
-     <height>101</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Настройки подключения</string>
-   </property>
-   <widget class="QLineEdit" name="com">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>20</y>
-      <width>361</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="maxLength">
-     <number>2</number>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-    <property name="dragEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="readOnly">
-     <bool>false</bool>
-    </property>
-    <property name="placeholderText">
-     <string>Введите com port</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="serial">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>60</y>
-      <width>361</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="maxLength">
-     <number>4000000</number>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-    <property name="dragEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="readOnly">
-     <bool>false</bool>
-    </property>
-    <property name="placeholderText">
-     <string>Введите все серийники (4 цифры) через запятую</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Номер COM порта:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>60</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Серийный номер:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-  </widget>
   <widget class="QPushButton" name="read">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>120</y>
+     <y>10</y>
      <width>511</width>
      <height>31</height>
     </rect>
@@ -149,9 +48,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>160</y>
+     <y>50</y>
      <width>531</width>
-     <height>281</height>
+     <height>381</height>
     </rect>
    </property>
   </widget>

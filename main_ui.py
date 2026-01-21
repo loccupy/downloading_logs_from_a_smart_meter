@@ -92,7 +92,7 @@ class UiForLogLoader(QWidget):
     def load_ip_with_port(self) -> dict:
         try:
             self.list_of_ip_with_port = get_ip()
-            print(f"Загружено {len(self.list_of_ip_with_port)} ip адресов")
+            print(f"\nЗагружено {len(self.list_of_ip_with_port)} ip адресов")
         except Exception as e:
             print(f"Не удалось получить ip адреса: {e}")
             message_in_out(f"Не удалось получить ip адреса: {e}")

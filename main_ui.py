@@ -81,13 +81,13 @@ class UiForLogLoader(QWidget):
         self.read.clicked.connect(self.start_read_meter_data)
         # self.read.clicked.connect(self.start_read_log_thread)
 
-    def load_serial_numbers(self):
-        try:
-            self.list_of_serial = get_serial_numbers()
-            print(f"Загружено {len(self.list_of_serial)} серийных номеров")
-        except Exception as e:
-            print(f"Не удалось получить серийные номера: {e}")
-            self.list_of_serial = []
+    # def load_serial_numbers(self):
+    #     try:
+    #         self.list_of_serial = get_serial_numbers()
+    #         print(f"Загружено {len(self.list_of_serial)} серийных номеров")
+    #     except Exception as e:
+    #         print(f"Не удалось получить серийные номера: {e}")
+    #         self.list_of_serial = []
 
     def load_ip_with_port(self) -> dict:
         try:
@@ -95,7 +95,8 @@ class UiForLogLoader(QWidget):
             print(f"Загружено {len(self.list_of_ip_with_port)} ip адресов")
         except Exception as e:
             print(f"Не удалось получить ip адреса: {e}")
-            self.list_of_ip_with_port = {}
+            message_in_out(f"Не удалось получить ip адреса: {e}")
+            raise
 
     def get_params(self):
         try:
@@ -112,7 +113,10 @@ class UiForLogLoader(QWidget):
 
     def read_meter_data_task(self, time_for_check, time_for_check_self_diagnostic):
         # self.load_serial_numbers()
-        self.load_ip_with_port()
+        try:
+            self.load_ip_with_port()
+        except Exception as e:
+            return
 
         config = self.get_params()
         current_time = datetime.now()
@@ -139,8 +143,8 @@ class UiForLogLoader(QWidget):
                 print(error_msg)
                 error_messages.append(error_msg)
                 all_successful = False
-            sleep(1)
-        if all_successful:
+
+        if all_successful and self.list_of_ip_with_port:
             message_in_out(f"#Опрос_IP\n"
                            f"С RSM загружено {len(self.list_of_ip_with_port)} ip адреса.\n"
                            f"Опрос счетчиков - успешно.\n"

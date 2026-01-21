@@ -110,180 +110,6 @@ class UiForLogLoader(QWidget):
             print(f"Ошибка при получении параметров: {e}")
             raise
 
-    # def get_list_of_serial_numbers(self):
-    #     try:
-    #         list_of_serial = [i.strip() for i in self.serial.text().split(',')]
-    #
-    #         return list_of_serial
-    #     except Exception as e:
-    #         print(f"Не удалось идентифицировать введенные серийные номера с ошибкой {e}!!!")
-    #         return []
-    #
-    # def get_list_of_serial_numbers_from_api(self):
-    #     try:
-    #         list_of_serial = get_serial_numbers()
-    #
-    #         return list_of_serial
-    #     except Exception as e:
-    #         print(f"Не удалось получить серийные номера по api запросу с ошибкой {e}!!!")
-    #         raise
-
-    # def read_meter_data_task(self):
-    #     list_of_serial = self.get_list_of_serial_numbers_from_api()
-    #     config = self.get_params()
-    #     time_for_check = CheckTime(list_of_serial)
-    #     time_for_check_self_diagnostic = CheckSelfDiagnostic(list_of_serial)
-    #
-    #     while True:
-    #         current_time = datetime.now()
-    #
-    #         # Проверяем, если минуты кратны 50
-    #         # if (current_time.minute / 10 == 1 or current_time.minute / 40 == 1) and current_time.minute != 0:
-    #         # if current_time.minute / 40 == 1:
-    #         if current_time.minute == 20:
-    #             file_name = f"Логи_опроса_{current_time.strftime("%d.%m.%Y_%H.%M.%S")}.txt"
-    #             # file_path = os.path.join(main_directory, file_name)
-    #             with open(file_name, "w", encoding="utf-8"):
-    #                 pass
-    #             for serial in list_of_serial:
-    #                 print(f'\n{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОПРОС СЧЕТЧИКА №[...{serial}]  #####', end='')
-    #                 config.serial_number = int(serial)
-    #                 try:
-    #                     meter_survey(config, time_for_check, time_for_check_self_diagnostic, file_name)
-    #                     print(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] ЗАКОНЧЕН #####')
-    #                     message_in_out(f'#####   ОПРОС СЧЕТЧИКА №[...{serial}] УСПЕШНО #####')
-    #                 except Exception as e:
-    #                     print(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
-    #                     message_in_out(f"#####   ОШИБКА ПРИ ОПРОСЕ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####")
-    #                     continue
-    #             copy_data(file_name)
-    #         # Ждем 1 минуту
-    #         time.sleep(60)
-
-    # def read_log(self,  time_for_sample):
-    #     config = self.get_params()
-    #
-    #     current_time = datetime.now()
-    #
-    #     tm = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-    #
-    #     main_directory = f'Выгрузка_журналов_{tm}'
-    #
-    #     if not os.path.exists(main_directory):
-    #         os.makedirs(main_directory)
-    #
-    #     file_name = f'report_{tm}.txt'
-    #     file_path = os.path.join(main_directory, file_name)
-    #     with open(file_path, 'w', encoding='utf-8') as f:
-    #         f.write('')
-    #
-    #     for serial in self.list_of_serial:
-    #
-    #         print(f'{current_time.strftime("%d-%m-%Y %H:%M:%S")} >>> #####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}]  #####')
-    #         config.serial_number = int(serial)
-    #         try:
-    #             result = read_logs(config, main_directory, time_for_sample)
-    #
-    #             self.file_name = result
-    #
-    #             self.analysis()
-    #
-    #             with open(file_path, 'a', encoding='utf-8') as f:
-    #                 if len(global_list) != 0:
-    #                     formatted_list = '  \n'.join([''.join(f'{i + 1}) {data};') for i, data in enumerate(copy(global_list))])
-    #                     f.write(f'\nДля файла >> {result[0]}:\n')
-    #                     f.write(formatted_list + '\n')
-    #
-    #             clear_global_list()
-    #             print(f'\n#####   ОБРАБОТКА ДАННЫХ ПУ №[...{serial}] ЗАКОНЧЕНА  #####\t')
-    #         except Exception as e:
-    #             setting_the_speed_to_default_values(config)
-    #             with open(file_path, 'a', encoding='utf-8') as f:
-    #                 f.write(f'\n#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n')
-    #             print(f"#####   ОШИБКА ПРИ ОБРАБОТКЕ ДАННЫХ СЧЕТЧИКА №...{serial} >> ошибка {e}  #####\n")
-    #             continue
-    #     with open(file_path, 'r', encoding='utf-8') as f:
-    #         content = f.read()
-    #     if not content:
-    #         message_in_out(f'#Выгрузка\n'
-    #                        f'При выгрузке журналов ошибок не обнаружено!'
-    #                        f' Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
-    #         with open(file_path, 'a', encoding='utf-8') as f:
-    #             f.write(f'При выгрузке журналов ошибок не обнаружено! '
-    #                     f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
-    #     else:
-    #         message_in_out(content + f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
-    #     copy_data(main_directory)
-
-    # def analysis(self):
-    #     print(f"\n  СТАРТ АНАЛИЗА ЖУРНАЛОВ...")
-    #     try:
-    #         old_file_name = self.file_name[0]
-    #         device_type = self.file_name[1]
-    #         file_name = old_file_name.replace('.xlsx', '_анализ.xlsx')
-    #
-    #         sheets = load_workbook(old_file_name)
-    #         sheets.save(file_name)
-    #
-    #         current_log_analysis(file_name)
-    #         self_diagnosis_log_analysis(file_name)
-    #         network_quality_log_analysis(file_name)
-    #         voltage_log_analysis(file_name)
-    #         communication_events_log_analysis(file_name)
-    #         access_control_log_analysis(file_name)
-    #         data_correction_log_analysis(file_name)
-    #         time_correction_log_analysis(file_name)
-    #         battery_charge_status_log_analysis(file_name)
-    #         power_log_analysis(file_name)
-    #         tangent_excess_log_analysis(file_name)
-    #         tangent_output_log_analysis(file_name)
-    #         network_quality_for_period_log_analysis(file_name)
-    #         on_and_off_log_analysis(file_name)
-    #         external_influences_log_analysis(file_name)
-    #         if 'TT' == device_type:
-    #             sampling_status_log_analysis(file_name)
-    #         daily_profile_log_analysis(file_name)
-    #         month_profile_log_analysis(file_name)
-    #         energy_profile_for_1_log_analysis(file_name)
-    #         energy_profile_for_2_log_analysis(file_name)
-    #         artur_profile_log_analysis(file_name)
-    #
-    #         print(f"  АНАЛИЗ ЖУРНАЛОВ ЗАВЕРШЕН")
-    #     except Exception as e:
-    #         print(f"Ошибка при анализе {e}")
-
-    # def start_read_log_thread(self):
-    #     try:
-    #         if not self.com.text().strip():
-    #             raise ValueError("Поле COM не может быть пустым")
-    #     except Exception as e:
-    #         QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
-    #         return
-    #
-    #     # self.time_for_check_2 = CheckTime(self.list_of_serial)
-    #     self.sample = CheckSelfDiagnostic(self.list_of_serial)
-    #
-    #     if self.timer_1 is None:
-    #         self.timer_1 = QTimer()
-    #         self.timer_1.timeout.connect(self.check_and_run_read_log_task)
-    #         self.timer_1.start(60000)  # Проверка каждые 60 секунд
-    #
-    #     # Запуск сразу, если условие выполняется
-    #     self.check_and_run_read_log_task()
-
-    # def is_read_log_thread_running(self):
-    #     return self.read_log_thread is not None and self.read_log_thread.isRunning()
-    #
-    # def run_read_log_task(self):
-    #     self.read_log_thread = WorkerThread(
-    #         self,
-    #         self.read_log,
-    #         self.sample
-    #     )
-    #     self.read_log_thread.finished.connect(self.on_log_thread_finished)
-    #     self.read_log_thread.error.connect(self.on_error)
-    #     self.read_log_thread.start()
-
     def read_meter_data_task(self, time_for_check, time_for_check_self_diagnostic):
         # self.load_serial_numbers()
         self.load_ip_with_port()
@@ -331,13 +157,6 @@ class UiForLogLoader(QWidget):
         copy_data(file_name)
 
     def start_read_meter_data(self):
-        # try:
-        #     if not self.com.text().strip():
-        #         raise ValueError("Поле COM не может быть пустым")
-        # except Exception as e:
-        #     QMessageBox.warning(self, "Ошибка ввода", f"Ошибка в заполнении формы: {e}")
-        #     return
-
         self.time_for_check_1 = CheckTime(self.list_of_serial)
         self.time_for_check_self_diagnostic_1 = CheckSelfDiagnostic(self.list_of_serial)
 
@@ -348,11 +167,6 @@ class UiForLogLoader(QWidget):
 
         # Запуск сразу, если условие выполняется
         self.check_and_run_meter_task()
-
-    # def check_and_run_read_log_task(self):
-    #     current_time = datetime.now()
-    #     if current_time.hour == 13 and current_time.minute == 0 and not self.is_read_log_thread_running():
-    #         self.run_read_log_task()
 
     def check_and_run_meter_task(self):
         current_time = datetime.now()

@@ -6,6 +6,7 @@ from libs.log_analysis import ipu_working_hours_ref, analysis_correct_date_ref, 
     time_ordering_analysis_for_integration_interval_1, time_ordering_analysis_for_integration_interval_2
 
 
+# Токи
 def current_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -22,6 +23,7 @@ def current_log_analysis(path_to_file):
         print(e)
 
 
+# Самодиагностики
 def self_diagnosis_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -39,6 +41,7 @@ def self_diagnosis_log_analysis(path_to_file):
         print(e)
 
 
+# Качества сети
 def network_quality_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -55,6 +58,7 @@ def network_quality_log_analysis(path_to_file):
         print(e)
 
 
+# Напряжения
 def voltage_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -72,6 +76,7 @@ def voltage_log_analysis(path_to_file):
         print(e)
 
 
+# Коммуникационные события
 def communication_events_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -88,6 +93,7 @@ def communication_events_log_analysis(path_to_file):
         print(e)
 
 
+# Контроля доступа
 def access_control_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -104,6 +110,7 @@ def access_control_log_analysis(path_to_file):
         print(e)
 
 
+# Коррекции данных
 def data_correction_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -118,9 +125,9 @@ def data_correction_log_analysis(path_to_file):
 
     except Exception as e:
         print(e)
-        raise
 
 
+# Коррекции времени
 def time_correction_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -137,6 +144,7 @@ def time_correction_log_analysis(path_to_file):
         print(e)
 
 
+# Состояния заряда батареи
 def battery_charge_status_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -146,6 +154,7 @@ def battery_charge_status_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
+        checking_for_repeated_on_or_offs(sheets, log_name)
 
         sheets.save(path_to_file)
 
@@ -153,6 +162,7 @@ def battery_charge_status_log_analysis(path_to_file):
         print(e)
 
 
+# Мощности
 def power_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -203,6 +213,7 @@ def tangent_output_log_analysis(path_to_file):
         print(e)
 
 
+# Качества сети за период
 def network_quality_for_period_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)
@@ -219,6 +230,7 @@ def network_quality_for_period_log_analysis(path_to_file):
         print(e)
 
 
+# Включений и выключений
 def on_and_off_log_analysis(path_to_file):
     try:
         sheets = load_workbook(path_to_file)

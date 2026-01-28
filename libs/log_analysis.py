@@ -263,8 +263,8 @@ def checkForSelfDiagnostics(sheets, log_name):
         raise f"Ошибка {e} при анализе кодов ошибок в {parse_log_name(log_name)}"
 
 
-# проверяет повторные включения или выключения в журнале вкл\выкл
-def checking_for_repeated_on_or_offs(sheets, log_name):
+# проверяет повторные события в журналах
+def checking_for_repeated_ref(sheets, log_name):
     format_dt = "%d.%m.%y %H:%M:%S"
     try:
         sheet = sheets[log_name]
@@ -272,7 +272,12 @@ def checking_for_repeated_on_or_offs(sheets, log_name):
         column_names = [cell for cell in sheet[1]]
         # Получаем номер столбца по названию
         for i in column_names:
-            if i.value == 'Событие':
+            if i.value in {
+                'Событие',
+                'Текущее состояние заряда батареи',
+                'Код события изменения температуры',
+                'Текущее положение аппаратной блокировки реле'
+            }:
                 column = i.column
                 break
 

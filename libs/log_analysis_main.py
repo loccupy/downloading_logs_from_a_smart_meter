@@ -1,9 +1,15 @@
 from openpyxl.reader.excel import load_workbook
 
-from libs.log_analysis import ipu_working_hours_ref, analysis_correct_date_ref, time_ordering_analysis_ref, \
-    time_ordering_analysis_for_daily_profile, time_ordering_analysis_for_month_profile, checkForSelfDiagnostics, \
-    checking_for_repeated_on_or_offs, time_ordering_analysis_for_artur_profile, \
-    time_ordering_analysis_for_integration_interval_1, time_ordering_analysis_for_integration_interval_2
+from libs.log_analysis import (ipu_working_hours_ref,
+                               analysis_correct_date_ref,
+                               time_ordering_analysis_ref,
+                               time_ordering_analysis_for_daily_profile,
+                               time_ordering_analysis_for_month_profile,
+                               checkForSelfDiagnostics,
+                               checking_for_repeated_ref,
+                               time_ordering_analysis_for_artur_profile,
+                               time_ordering_analysis_for_integration_interval_1,
+                               time_ordering_analysis_for_integration_interval_2)
 
 
 # Токи
@@ -68,7 +74,7 @@ def voltage_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
-        checking_for_repeated_on_or_offs(sheets, log_name)
+        checking_for_repeated_ref(sheets, log_name)
 
         sheets.save(path_to_file)
 
@@ -154,7 +160,7 @@ def battery_charge_status_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
-        checking_for_repeated_on_or_offs(sheets, log_name)
+        checking_for_repeated_ref(sheets, log_name)
 
         sheets.save(path_to_file)
 
@@ -240,7 +246,7 @@ def on_and_off_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
-        checking_for_repeated_on_or_offs(sheets, log_name)
+        checking_for_repeated_ref(sheets, log_name)
 
         sheets.save(path_to_file)
 
@@ -258,7 +264,43 @@ def external_influences_log_analysis(path_to_file):
         analysis_correct_date_ref(sheets, log_name)
         time_ordering_analysis_ref(sheets, log_name)
         ipu_working_hours_ref(sheets, log_name)
-        checking_for_repeated_on_or_offs(sheets, log_name)
+        checking_for_repeated_ref(sheets, log_name)
+
+        sheets.save(path_to_file)
+
+    except Exception as e:
+        print(e)
+
+
+# Температуры
+def temperature_log_analysis(path_to_file):
+    try:
+        sheets = load_workbook(path_to_file)
+        log_name = 'Журнал температуры'
+        print("Анализ журнала температуры...")
+
+        analysis_correct_date_ref(sheets, log_name)
+        time_ordering_analysis_ref(sheets, log_name)
+        ipu_working_hours_ref(sheets, log_name)
+        checking_for_repeated_ref(sheets, log_name)
+
+        sheets.save(path_to_file)
+
+    except Exception as e:
+        print(e)
+
+
+# Блокиратор реле
+def relay_lock_log_analysis(path_to_file):
+    try:
+        sheets = load_workbook(path_to_file)
+        log_name = 'Журнал блокиратора реле'
+        print("Анализ журнала блокиратора реле...")
+
+        analysis_correct_date_ref(sheets, log_name)
+        time_ordering_analysis_ref(sheets, log_name)
+        ipu_working_hours_ref(sheets, log_name)
+        checking_for_repeated_ref(sheets, log_name)
 
         sheets.save(path_to_file)
 

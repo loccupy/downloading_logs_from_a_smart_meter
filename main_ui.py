@@ -233,6 +233,9 @@ class UiForLogLoader(QWidget):
             tangent_output_log_analysis(file_name)
             network_quality_for_period_log_analysis(file_name)
             on_and_off_log_analysis(file_name)
+            temperature_log_analysis(file_name)
+            if 'TT' != device_type:
+                relay_lock_log_analysis(file_name)
             external_influences_log_analysis(file_name)
             if 'TT' == device_type:
                 sampling_status_log_analysis(file_name)
@@ -437,7 +440,8 @@ def debug():
     # on_and_off_log_analysis(file_name)
     # external_influences_log_analysis(file_name)
     # sampling_status_log_analysis(file_name)
-    # sampling_status_log_analysis(file_name)
+    # temperature_log_analysis(file_name)
+    # relay_lock_log_analysis(file_name)
     # month_profile_log_analysis(file_name)
     # energy_profile_for_1_log_analysis(file_name)
     # energy_profile_for_2_log_analysis(file_name)

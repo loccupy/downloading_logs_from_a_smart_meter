@@ -102,7 +102,7 @@ def read_logs(config):
         create_sheet_in_excel_file(unloading_the_voltage_log, excel_writer, 'Журнал напряжения', reader, sample)
         create_sheet_in_excel_file(unloading_power_log, excel_writer, 'Журнал мощности', reader, sample)
         # if config.flag_viborka:
-        #     create_sheet_in_excel_file(unloading_temperature_log, excel_writer, 'Журнал температуры', reader, sample)
+        create_sheet_in_excel_file(unloading_temperature_log, excel_writer, 'Журнал температуры', reader, sample)
         create_sheet_in_excel_file(unloading_self_diagnosis_log, excel_writer, 'Журнал самодиагностики', reader, sample)
         create_sheet_in_excel_file(unloading_network_quality_log, excel_writer, 'Журнал качества сети', reader, sample)
         create_sheet_in_excel_file(unloading_time_correction_log, excel_writer, 'Журнал коррекции времени', reader, sample)

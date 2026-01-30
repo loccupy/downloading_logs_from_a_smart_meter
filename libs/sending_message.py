@@ -15,12 +15,26 @@ def add_to_global_message(item):
 def clear_global_message():
     global_message.clear()
 
+MAX_MESSAGE_LENGTH = 4096  # Максимальная длина сообщения в Telegram
+def split_message_into_chunks (text):
+    """"Делит сообщение на куски меньше MAX_MESSAGE_LENGTH."""
+    chunks = []
+    while len(text) > MAX_MESSAGE_LENGTH:
+        chunk = text[:MAX_MESSAGE_LENGTH]
+        chunks.append(chunk)
+        text = text[MAX_MESSAGE_LENGTH:]
+    if text:
+        chunks.append(text)
+    return chunks
 
 def message_in_out(string):
     try:
+        # Разобьем сообщение на небольшие части
+        chunks = split_message_into_chunks(string)
         # Отправить в бот Отчет
-        telegram = get_notifier('telegram')
-        telegram.notify(message=string,
+        for chunk in chunks:
+            telegram = get_notifier('telegram')
+            telegram.notify(message=chunk,
                         token='7938367301:AAFXCHUuNB3VCuB1Xl7BAISUY7kLpMXAp7o',
                         chat_id=218940403)
 

@@ -330,3 +330,57 @@ def time_ordering_analysis_with_minutes(sheets, log_name, time):
             cell_0 = row[0]
     except Exception as e:
         raise f"Ошибка {e} при анализе 'Время фиксации записи' в {parse_log_name(log_name)}"
+
+
+# проверяет .....
+def check_corr_between_recording_and_operating_time(sheets, log_name):
+    format_dt = "%d.%m.%y %H:%M:%S"
+    try:
+        sheet = sheets[log_name]
+        column_record_time = None
+        column_order_time = None
+        column_names = [cell for cell in sheet[1]]
+        # Получаем номер столбца по названию
+        for i in column_names:
+            if i.value == 'Время фиксации записи':
+                column_record_time = i.column
+                continue
+            if i.value == 'Время работы ПУ':
+                column_order_time = i.column
+
+        # Проверяем все значения столбца и, в случае совпадения условия, перекрашиваем ячейку
+        for i, row in enumerate(sheet.iter_rows(min_row=2, min_col=column_record_time, max_col=column_record_time)):
+            # Получаем и сохраняем первую ячейку + пропускаем ее для обработки
+            if i == 0:
+                cell_0_record_time = row[0]
+                cell_0_order_time = sheet.column[column_order_time][i]
+                continue
+
+            # Получаем ячейку
+            cell_1_record_time = row[0]
+            cell_1_order_time = sheet.column[column_order_time][i]
+
+            if ((is_valid_date_for_anal(str(cell_0_record_time.value)) and
+                is_valid_date_for_anal(str(cell_1_record_time.value))) and
+                    (cell_0_order_time.value is not None) and (cell_1_order_time.value is not None)):
+                delta_record_time = (datetime.datetime.strptime(str(cell_0_record_time.value), format_dt) -
+                                     datetime.datetime.strptime(str(cell_1_record_time.value), format_dt))
+                delta_order_time = int(cell_0_order_time) - int(cell_1_order_time)
+                # Проверяем условие
+                if delta_record_time != delta_order_time:
+                    cell_0_record_time.fill = pink_fill
+                    sleep(0.1)
+                    cell_0_record_time.fill = pink_fill
+                    sleep(0.1)
+                    cell_1_record_time.fill = pink_fill
+                    sleep(0.1)
+                    cell_1_record_time.fill = pink_fill
+                    sleep(0.1)
+
+                    print(
+                        f"Некорректная разница во времени фиксации записей в строчках {cell_0_record_time.row}-"
+                        f"{cell_1_record_time.row} в '{parse_log_name(log_name)}'")
+            cell_0_record_time = row[0]
+            cell_0_order_time = sheet.column[column_order_time][i]
+    except Exception as e:
+        raise f"Ошибка {e} при анализе 'Время фиксации записи' в {parse_log_name(log_name)}"

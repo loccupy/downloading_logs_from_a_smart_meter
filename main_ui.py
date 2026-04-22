@@ -96,10 +96,8 @@ class UiForLogLoader(QWidget):
         )
 
         self.read = self.findChild(QtWidgets.QPushButton, 'read')
-        # self.read.clicked.connect(self.read_log)
 
         self.analisys = self.findChild(QtWidgets.QPushButton, 'analisys')
-        # self.analisys.clicked.connect(self.analysis)
 
         self.text_edit = self.findChild(QtWidgets.QTextEdit, 'textEdit')
         self.text_edit.setReadOnly(True)  # Запрещаем редактирование

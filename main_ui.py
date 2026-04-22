@@ -147,7 +147,6 @@ class UiForLogLoader(QWidget):
 
     def _speeding_down_and_close(self):
         try:
-            # init_connect(self.reader, self.settings)
             setting_the_speed_to_default_values(self.reader)
             close_reader(self.reader)
         except Exception as e:
@@ -167,7 +166,6 @@ class UiForLogLoader(QWidget):
         except Exception as e:
             print(f"Ошибка при считывании журналов >> {e}")
 
-
     def check_device_type_from_filename(self, filename):
         if '1PH' in filename:
             return '1PH'
@@ -178,7 +176,6 @@ class UiForLogLoader(QWidget):
         else:
             print('Тип счетчика не распознан')
             raise Exception('Тип счетчика не распознан')
-
 
     def analysis(self):
         try:
@@ -204,6 +201,8 @@ class UiForLogLoader(QWidget):
             network_quality_for_period_log_analysis(file_name)
             on_and_off_log_analysis(file_name)
             external_influences_log_analysis(file_name)
+            if self.flag_temperatyre:
+                temperature_log_analysis(file_name)
             if 'TT' == device_type:
                 sampling_status_log_analysis(file_name)
             daily_profile_log_analysis(file_name)
@@ -357,14 +356,14 @@ def start_ui():
 
 
 def debug():
-    file_name = "Serial_240101000000000_30.07.25_12.36.41.xlsx"
+    file_name = "Номер_(06328)_тип_(3PH)_21.04.26_16.41.18.xlsx"
     # current_log_analysis(file_name)
-    # self_diagnosis_log_analysis(file_name)
+    self_diagnosis_log_analysis(file_name)
     # network_quality_log_analysis(file_name)
     # voltage_log_analysis(file_name)
     # communication_events_log_analysis(file_name)
     # access_control_log_analysis(file_name)
-    data_correction_log_analysis(file_name)
+    # data_correction_log_analysis(file_name)
     # time_correction_log_analysis(file_name)
     # battery_charge_status_log_analysis(file_name)
     # power_log_analysis(file_name)

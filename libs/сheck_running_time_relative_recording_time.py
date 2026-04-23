@@ -1,13 +1,13 @@
 class RunRelativeRecord:
     def __init__(self, excel_file_path):
         self.excel_file_path = excel_file_path
-        self.workbook = self._load_workbook()
+        self.workbook = self.__load_workbook()
 
-    def _load_workbook(self):
+    def __load_workbook(self):
         from openpyxl import load_workbook
         return load_workbook(self.excel_file_path)
 
-    def extract_time_data(self):
+    def __extract_time_data(self):
         """
         Считывает значения из столбцов:
         - "Время фиксации записи"
@@ -55,7 +55,7 @@ class RunRelativeRecord:
 
         return data
 
-    def find_time_fix_matches(self, time_data, tolerance_minutes=0.1):
+    def __find_time_fix_matches(self, tolerance_minutes=0.1):
         """
         Ищет совпадения между 'time_fix' с одного листа и 'time_fix' с другого листа,
         если они находятся в пределах указанной погрешности (по умолчанию — 2 минуты).
@@ -65,6 +65,8 @@ class RunRelativeRecord:
         :return: список совпадений с информацией о ячейках и разнице во времени
         """
         from datetime import timedelta
+
+        time_data = self.__extract_time_data()
 
         matches = []
         tolerance = timedelta(minutes=tolerance_minutes)
@@ -112,8 +114,9 @@ class RunRelativeRecord:
 
         return matches
 
-    def find_false_res(self, matches):
-        from datetime import timedelta
+    def find_false_res(self):
+        matches = self.__find_time_fix_matches(tolerance_minutes=0.1)
+
         for match in matches:
             try:
                 delta1 = match['time_diff_1']
@@ -121,8 +124,7 @@ class RunRelativeRecord:
                 diff = abs(delta1-delta2)
                 if diff > 3:
                     print("Несоответствие интервалов:", match)
-                    print(f"Интервал 1: {delta1}, Интервал 2: {delta2}")
-                    print(f"Разница: {diff}\n")
+                    print(f"Интервал 1 [{delta1}] - Интервал 2 [{delta2}] = {diff}\n")
             except KeyError as e:
                 print(f"Не хватает поля: {e}")
             except TypeError as e:

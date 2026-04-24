@@ -124,7 +124,7 @@ class RunRelativeRecord:
                 diff = abs(delta1-delta2)
                 if diff > 3:
                     print("Несоответствие интервалов:", match)
-                    print(f"Интервал 1 [{delta1}] - Интервал 2 [{delta2}] = {diff}\n")
+                    print(f"Интервал 1 [{delta1}] - Интервал 2 [{delta2}] = {diff} сек.\n")
             except KeyError as e:
                 print(f"Не хватает поля: {e}")
             except TypeError as e:

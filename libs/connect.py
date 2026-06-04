@@ -67,13 +67,13 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=3):
         data = GXDLMSData('0.0.96.12.4.255')
         val = reader.read(data, 2)
 
-        if val == 9:
+        if val == 9 or val == 1:
             print("Интерфейс >> ОПТОПОРТ")
         else:
             print("Интерфейс >> RS")
 
         # Изменение скорости в зависимости от типа интерфейса
-        if val == 18:
+        if val == 18 or val == 2:
             speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
             old_speed = reader.read(speed, 2)
             if old_speed == 5:
@@ -96,7 +96,7 @@ def speeding_up_the_connection(config, attempt=1, max_attempts=3):
         # Определение новой скорости
         list_of_baud = {"5": 9600, "6": 19200, "9": 115200}
         baud = list_of_baud.get(str(new_speed), 0)
-        if val == 18:
+        if val == 18 or val == 2:
             print(f"Скорость для нового соединения по RS >> {baud}")
         else:
             print(f"Скорость для нового соединения по ОПТОПОРТу >> {baud}")

@@ -8,6 +8,8 @@ import pandas as pd
 from libs.connect import init_connect, close_reader, get_reader
 from libs.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
 from libs.sending_message import message_in_out
+from libs.gurux.dlms import GXDateTime
+from libs.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSData
 
 
 def unloading_energy_profile_for_recording_interval_1(open_and_close_connection, sample):
@@ -64,9 +66,11 @@ def unloading_energy_profile_for_recording_interval_2(open_and_close_connection,
 
 def unloading_monthly_profile(open_and_close_connection, sample):
     print("Начал запись Месячного профиля...")
+    proshivka = vers_proshivki(open_and_close_connection)
     data = GXDLMSProfileGeneric("1.0.98.1.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
+
     time = []
     accumulated_active_energy_import_total_for_all_time = []
     accumulated_active_energy_import_tariff_1_for_all_time = []
@@ -88,51 +92,155 @@ def unloading_monthly_profile(open_and_close_connection, sample):
     reactive_energy_at_tariff_2_export = []
     reactive_energy_at_tariff_3_export = []
     reactive_energy_at_tariff_4_export = []
-    for i in range(len(logs)):
-        time.append(ref_date_time(logs[i][0]))
-        accumulated_active_energy_import_total_for_all_time.append(logs[i][1])
-        accumulated_active_energy_import_tariff_1_for_all_time.append(logs[i][2])
-        accumulated_active_energy_import_tariff_2_for_all_time.append(logs[i][3])
-        accumulated_active_energy_import_tariff_3_for_all_time.append(logs[i][4])
-        accumulated_active_energy_import_tariff_4_for_all_time.append(logs[i][5])
-        accumulated_active_energy_export_total_for_all_time.append(logs[i][6])
-        accumulated_active_energy_export_tariff_1_for_all_time.append(logs[i][7])
-        accumulated_active_energy_export_tariff_2_for_all_time.append(logs[i][8])
-        accumulated_active_energy_export_tariff_3_for_all_time.append(logs[i][9])
-        accumulated_active_energy_export_tariff_4_for_all_time.append(logs[i][10])
-        total_reactive_energy_import.append(logs[i][11])
-        reactive_energy_at_tariff_1_import.append(logs[i][12])
-        reactive_energy_at_tariff_2_import.append(logs[i][13])
-        reactive_energy_at_tariff_3_import.append(logs[i][14])
-        reactive_energy_at_tariff_4_import.append(logs[i][15])
-        total_reactive_energy_export.append(logs[i][16])
-        reactive_energy_at_tariff_1_export.append(logs[i][17])
-        reactive_energy_at_tariff_2_export.append(logs[i][18])
-        reactive_energy_at_tariff_3_export.append(logs[i][19])
-        reactive_energy_at_tariff_4_export.append(logs[i][20])
 
-    dictionary = {"Время фиксации записи": time,
-                  "Накопленная активная энергия (импорт) общая за все время": accumulated_active_energy_import_total_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 1 за все время': accumulated_active_energy_import_tariff_1_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 2 за все время': accumulated_active_energy_import_tariff_2_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 3 за все время': accumulated_active_energy_import_tariff_3_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 4 за все время': accumulated_active_energy_import_tariff_4_for_all_time,
-                  'Накопленная активная энергия (экспорт) общая за все время': accumulated_active_energy_export_total_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 1 за все время': accumulated_active_energy_export_tariff_1_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 2 за все время': accumulated_active_energy_export_tariff_2_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 3 за все время': accumulated_active_energy_export_tariff_3_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 4 за все время': accumulated_active_energy_export_tariff_4_for_all_time,
-                  'Суммарная реактивная энергия, импорт': total_reactive_energy_import,
-                  'Реактивная энергия по тарифу 1, импорт': reactive_energy_at_tariff_1_import,
-                  'Реактивная энергия по тарифу 2, импорт': reactive_energy_at_tariff_2_import,
-                  'Реактивная энергия по тарифу 3, импорт': reactive_energy_at_tariff_3_import,
-                  'Реактивная энергия по тарифу 4, импорт': reactive_energy_at_tariff_4_import,
-                  'Суммарная реактивная энергия, экспорт': total_reactive_energy_export,
-                  'Реактивная энергия по тарифу 1, экспорт': reactive_energy_at_tariff_1_export,
-                  'Реактивная энергия по тарифу 2, экспорт': reactive_energy_at_tariff_2_export,
-                  'Реактивная энергия по тарифу 3, экспорт': reactive_energy_at_tariff_3_export,
-                  'Реактивная энергия по тарифу 4, экспорт': reactive_energy_at_tariff_4_export,
-                  }
+    if 100 > proshivka > 18:
+        accumulated_active_energy_import_tariff_5_for_all_time = []
+        accumulated_active_energy_import_tariff_6_for_all_time = []
+        accumulated_active_energy_import_tariff_7_for_all_time = []
+        accumulated_active_energy_import_tariff_8_for_all_time = []
+        accumulated_active_energy_export_tariff_5_for_all_time = []
+        accumulated_active_energy_export_tariff_6_for_all_time = []
+        accumulated_active_energy_export_tariff_7_for_all_time = []
+        accumulated_active_energy_export_tariff_8_for_all_time = []
+        reactive_energy_at_tariff_5_import = []
+        reactive_energy_at_tariff_6_import = []
+        reactive_energy_at_tariff_7_import = []
+        reactive_energy_at_tariff_8_import = []
+        reactive_energy_at_tariff_5_export = []
+        reactive_energy_at_tariff_6_export = []
+        reactive_energy_at_tariff_7_export = []
+        reactive_energy_at_tariff_8_export = []
+
+    for i in range(len(logs)):
+        if 100 > proshivka > 18:
+            time.append(ref_date_time(logs[i][0]))
+
+            accumulated_active_energy_import_total_for_all_time.append(logs[i][1])
+            accumulated_active_energy_import_tariff_1_for_all_time.append(logs[i][2])
+            accumulated_active_energy_import_tariff_2_for_all_time.append(logs[i][3])
+            accumulated_active_energy_import_tariff_3_for_all_time.append(logs[i][4])
+            accumulated_active_energy_import_tariff_4_for_all_time.append(logs[i][5])
+            accumulated_active_energy_import_tariff_5_for_all_time.append(logs[i][6])
+            accumulated_active_energy_import_tariff_6_for_all_time.append(logs[i][7])
+            accumulated_active_energy_import_tariff_7_for_all_time.append(logs[i][8])
+            accumulated_active_energy_import_tariff_8_for_all_time.append(logs[i][9])
+
+            accumulated_active_energy_export_total_for_all_time.append(logs[i][10])
+            accumulated_active_energy_export_tariff_1_for_all_time.append(logs[i][11])
+            accumulated_active_energy_export_tariff_2_for_all_time.append(logs[i][12])
+            accumulated_active_energy_export_tariff_3_for_all_time.append(logs[i][13])
+            accumulated_active_energy_export_tariff_4_for_all_time.append(logs[i][14])
+            accumulated_active_energy_export_tariff_5_for_all_time.append(logs[i][15])
+            accumulated_active_energy_export_tariff_6_for_all_time.append(logs[i][16])
+            accumulated_active_energy_export_tariff_7_for_all_time.append(logs[i][17])
+            accumulated_active_energy_export_tariff_8_for_all_time.append(logs[i][18])
+
+            total_reactive_energy_import.append(logs[i][19])
+            reactive_energy_at_tariff_1_import.append(logs[i][20])
+            reactive_energy_at_tariff_2_import.append(logs[i][21])
+            reactive_energy_at_tariff_3_import.append(logs[i][22])
+            reactive_energy_at_tariff_4_import.append(logs[i][23])
+            reactive_energy_at_tariff_5_import.append(logs[i][24])
+            reactive_energy_at_tariff_6_import.append(logs[i][25])
+            reactive_energy_at_tariff_7_import.append(logs[i][26])
+            reactive_energy_at_tariff_8_import.append(logs[i][27])
+
+            total_reactive_energy_export.append(logs[i][28])
+            reactive_energy_at_tariff_1_export.append(logs[i][29])
+            reactive_energy_at_tariff_2_export.append(logs[i][30])
+            reactive_energy_at_tariff_3_export.append(logs[i][31])
+            reactive_energy_at_tariff_4_export.append(logs[i][32])
+            reactive_energy_at_tariff_5_export.append(logs[i][33])
+            reactive_energy_at_tariff_6_export.append(logs[i][34])
+            reactive_energy_at_tariff_7_export.append(logs[i][35])
+            reactive_energy_at_tariff_8_export.append(logs[i][36])
+
+        else:
+            time.append(ref_date_time(logs[i][0]))
+            accumulated_active_energy_import_total_for_all_time.append(logs[i][1])
+            accumulated_active_energy_import_tariff_1_for_all_time.append(logs[i][2])
+            accumulated_active_energy_import_tariff_2_for_all_time.append(logs[i][3])
+            accumulated_active_energy_import_tariff_3_for_all_time.append(logs[i][4])
+            accumulated_active_energy_import_tariff_4_for_all_time.append(logs[i][5])
+            accumulated_active_energy_export_total_for_all_time.append(logs[i][6])
+            accumulated_active_energy_export_tariff_1_for_all_time.append(logs[i][7])
+            accumulated_active_energy_export_tariff_2_for_all_time.append(logs[i][8])
+            accumulated_active_energy_export_tariff_3_for_all_time.append(logs[i][9])
+            accumulated_active_energy_export_tariff_4_for_all_time.append(logs[i][10])
+            total_reactive_energy_import.append(logs[i][11])
+            reactive_energy_at_tariff_1_import.append(logs[i][12])
+            reactive_energy_at_tariff_2_import.append(logs[i][13])
+            reactive_energy_at_tariff_3_import.append(logs[i][14])
+            reactive_energy_at_tariff_4_import.append(logs[i][15])
+            total_reactive_energy_export.append(logs[i][16])
+            reactive_energy_at_tariff_1_export.append(logs[i][17])
+            reactive_energy_at_tariff_2_export.append(logs[i][18])
+            reactive_energy_at_tariff_3_export.append(logs[i][19])
+            reactive_energy_at_tariff_4_export.append(logs[i][20])
+
+    if 100 > proshivka > 18:
+        dictionary = {"Время фиксации записи": time,
+                      "Накопленная активная энергия (импорт) общая за все время": accumulated_active_energy_import_total_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 1 за все время': accumulated_active_energy_import_tariff_1_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 2 за все время': accumulated_active_energy_import_tariff_2_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 3 за все время': accumulated_active_energy_import_tariff_3_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 4 за все время': accumulated_active_energy_import_tariff_4_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 5 за все время': accumulated_active_energy_import_tariff_5_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 6 за все время': accumulated_active_energy_import_tariff_6_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 7 за все время': accumulated_active_energy_import_tariff_7_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 8 за все время': accumulated_active_energy_import_tariff_8_for_all_time,
+                      'Накопленная активная энергия (экспорт) общая за все время': accumulated_active_energy_export_total_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 1 за все время': accumulated_active_energy_export_tariff_1_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 2 за все время': accumulated_active_energy_export_tariff_2_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 3 за все время': accumulated_active_energy_export_tariff_3_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 4 за все время': accumulated_active_energy_export_tariff_4_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 5 за все время': accumulated_active_energy_export_tariff_5_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 6 за все время': accumulated_active_energy_export_tariff_6_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 7 за все время': accumulated_active_energy_export_tariff_7_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 8 за все время': accumulated_active_energy_export_tariff_8_for_all_time,
+                      'Суммарная реактивная энергия, импорт': total_reactive_energy_import,
+                      'Реактивная энергия по тарифу 1, импорт': reactive_energy_at_tariff_1_import,
+                      'Реактивная энергия по тарифу 2, импорт': reactive_energy_at_tariff_2_import,
+                      'Реактивная энергия по тарифу 3, импорт': reactive_energy_at_tariff_3_import,
+                      'Реактивная энергия по тарифу 4, импорт': reactive_energy_at_tariff_4_import,
+                      'Реактивная энергия по тарифу 5, импорт': reactive_energy_at_tariff_5_import,
+                      'Реактивная энергия по тарифу 6, импорт': reactive_energy_at_tariff_6_import,
+                      'Реактивная энергия по тарифу 7, импорт': reactive_energy_at_tariff_7_import,
+                      'Реактивная энергия по тарифу 8, импорт': reactive_energy_at_tariff_8_import,
+                      'Суммарная реактивная энергия, экспорт': total_reactive_energy_export,
+                      'Реактивная энергия по тарифу 1, экспорт': reactive_energy_at_tariff_1_export,
+                      'Реактивная энергия по тарифу 2, экспорт': reactive_energy_at_tariff_2_export,
+                      'Реактивная энергия по тарифу 3, экспорт': reactive_energy_at_tariff_3_export,
+                      'Реактивная энергия по тарифу 4, экспорт': reactive_energy_at_tariff_4_export,
+                      'Реактивная энергия по тарифу 5, экспорт': reactive_energy_at_tariff_5_export,
+                      'Реактивная энергия по тарифу 6, экспорт': reactive_energy_at_tariff_6_export,
+                      'Реактивная энергия по тарифу 7, экспорт': reactive_energy_at_tariff_7_export,
+                      'Реактивная энергия по тарифу 8, экспорт': reactive_energy_at_tariff_8_export
+                      }
+    else:
+        dictionary = {"Время фиксации записи": time,
+                      "Накопленная активная энергия (импорт) общая за все время": accumulated_active_energy_import_total_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 1 за все время': accumulated_active_energy_import_tariff_1_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 2 за все время': accumulated_active_energy_import_tariff_2_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 3 за все время': accumulated_active_energy_import_tariff_3_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 4 за все время': accumulated_active_energy_import_tariff_4_for_all_time,
+                      'Накопленная активная энергия (экспорт) общая за все время': accumulated_active_energy_export_total_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 1 за все время': accumulated_active_energy_export_tariff_1_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 2 за все время': accumulated_active_energy_export_tariff_2_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 3 за все время': accumulated_active_energy_export_tariff_3_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 4 за все время': accumulated_active_energy_export_tariff_4_for_all_time,
+                      'Суммарная реактивная энергия, импорт': total_reactive_energy_import,
+                      'Реактивная энергия по тарифу 1, импорт': reactive_energy_at_tariff_1_import,
+                      'Реактивная энергия по тарифу 2, импорт': reactive_energy_at_tariff_2_import,
+                      'Реактивная энергия по тарифу 3, импорт': reactive_energy_at_tariff_3_import,
+                      'Реактивная энергия по тарифу 4, импорт': reactive_energy_at_tariff_4_import,
+                      'Суммарная реактивная энергия, экспорт': total_reactive_energy_export,
+                      'Реактивная энергия по тарифу 1, экспорт': reactive_energy_at_tariff_1_export,
+                      'Реактивная энергия по тарифу 2, экспорт': reactive_energy_at_tariff_2_export,
+                      'Реактивная энергия по тарифу 3, экспорт': reactive_energy_at_tariff_3_export,
+                      'Реактивная энергия по тарифу 4, экспорт': reactive_energy_at_tariff_4_export,
+                      }
+
     df = pd.DataFrame(dictionary)
     print("Месячный профиль записан")
     return df
@@ -140,9 +248,15 @@ def unloading_monthly_profile(open_and_close_connection, sample):
 
 def unloading_daily_profile(open_and_close_connection, sample):
     print("Начал запись Суточного профиля...")
+
+    # Аналогия с месячным профилем: получаем версию прошивки
+    proshivka = vers_proshivki(open_and_close_connection)
+
     data = GXDLMSProfileGeneric("1.0.98.2.0.255")
     open_and_close_connection.read(data, 3)
     logs = range_by_date(open_and_close_connection, data, sample)
+
+    # --- Инициализация переменных (строго как в месячном профиле) ---
     time = []
     accumulated_active_energy_import_total_for_all_time = []
     accumulated_active_energy_import_tariff_1_for_all_time = []
@@ -164,51 +278,166 @@ def unloading_daily_profile(open_and_close_connection, sample):
     reactive_energy_at_tariff_2_export = []
     reactive_energy_at_tariff_3_export = []
     reactive_energy_at_tariff_4_export = []
-    for i in range(len(logs)):
-        time.append(ref_date_time(logs[i][0]))
-        accumulated_active_energy_import_total_for_all_time.append(logs[i][1])
-        accumulated_active_energy_import_tariff_1_for_all_time.append(logs[i][2])
-        accumulated_active_energy_import_tariff_2_for_all_time.append(logs[i][3])
-        accumulated_active_energy_import_tariff_3_for_all_time.append(logs[i][4])
-        accumulated_active_energy_import_tariff_4_for_all_time.append(logs[i][5])
-        accumulated_active_energy_export_total_for_all_time.append(logs[i][6])
-        accumulated_active_energy_export_tariff_1_for_all_time.append(logs[i][7])
-        accumulated_active_energy_export_tariff_2_for_all_time.append(logs[i][8])
-        accumulated_active_energy_export_tariff_3_for_all_time.append(logs[i][9])
-        accumulated_active_energy_export_tariff_4_for_all_time.append(logs[i][10])
-        total_reactive_energy_import.append(logs[i][11])
-        reactive_energy_at_tariff_1_import.append(logs[i][12])
-        reactive_energy_at_tariff_2_import.append(logs[i][13])
-        reactive_energy_at_tariff_3_import.append(logs[i][14])
-        reactive_energy_at_tariff_4_import.append(logs[i][15])
-        total_reactive_energy_export.append(logs[i][16])
-        reactive_energy_at_tariff_1_export.append(logs[i][17])
-        reactive_energy_at_tariff_2_export.append(logs[i][18])
-        reactive_energy_at_tariff_3_export.append(logs[i][19])
-        reactive_energy_at_tariff_4_export.append(logs[i][20])
 
-    dictionary = {"Время фиксации записи": time,
-                  "Накопленная активная энергия (импорт) общая за все время": accumulated_active_energy_import_total_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 1 за все время': accumulated_active_energy_import_tariff_1_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 2 за все время': accumulated_active_energy_import_tariff_2_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 3 за все время': accumulated_active_energy_import_tariff_3_for_all_time,
-                  'Накопленная активная энергия (импорт) тариф 4 за все время': accumulated_active_energy_import_tariff_4_for_all_time,
-                  'Накопленная активная энергия (экспорт) общая за все время': accumulated_active_energy_export_total_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 1 за все время': accumulated_active_energy_export_tariff_1_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 2 за все время': accumulated_active_energy_export_tariff_2_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 3 за все время': accumulated_active_energy_export_tariff_3_for_all_time,
-                  'Накопленная активная энергия (экспорт) тариф 4 за все время': accumulated_active_energy_export_tariff_4_for_all_time,
-                  'Суммарная реактивная энергия, импорт': total_reactive_energy_import,
-                  'Реактивная энергия по тарифу 1, импорт': reactive_energy_at_tariff_1_import,
-                  'Реактивная энергия по тарифу 2, импорт': reactive_energy_at_tariff_2_import,
-                  'Реактивная энергия по тарифу 3, импорт': reactive_energy_at_tariff_3_import,
-                  'Реактивная энергия по тарифу 4, импорт': reactive_energy_at_tariff_4_import,
-                  'Суммарная реактивная энергия, экспорт': total_reactive_energy_export,
-                  'Реактивная энергия по тарифу 1, экспорт': reactive_energy_at_tariff_1_export,
-                  'Реактивная энергия по тарифу 2, экспорт': reactive_energy_at_tariff_2_export,
-                  'Реактивная энергия по тарифу 3, экспорт': reactive_energy_at_tariff_3_export,
-                  'Реактивная энергия по тарифу 4, экспорт': reactive_energy_at_tariff_4_export,
-                  }
+    # Блок инициализации дополнительных тарифов (как в месячном профиле, если прошивка новая)
+    if 100 > proshivka > 18:
+        accumulated_active_energy_import_tariff_5_for_all_time = []
+        accumulated_active_energy_import_tariff_6_for_all_time = []
+        accumulated_active_energy_import_tariff_7_for_all_time = []
+        accumulated_active_energy_import_tariff_8_for_all_time = []
+        accumulated_active_energy_export_tariff_5_for_all_time = []
+        accumulated_active_energy_export_tariff_6_for_all_time = []
+        accumulated_active_energy_export_tariff_7_for_all_time = []
+        accumulated_active_energy_export_tariff_8_for_all_time = []
+        reactive_energy_at_tariff_5_import = []
+        reactive_energy_at_tariff_6_import = []
+        reactive_energy_at_tariff_7_import = []
+        reactive_energy_at_tariff_8_import = []
+        reactive_energy_at_tariff_5_export = []
+        reactive_energy_at_tariff_6_export = []
+        reactive_energy_at_tariff_7_export = []
+        reactive_energy_at_tariff_8_export = []
+
+    for i in range(len(logs)):
+        # Логика заполнения аналогична месячному профилю
+        if 100 > proshivka > 18:
+            # Ветка для прошивок с поддержкой 8 тарифов
+            time.append(ref_date_time(logs[i][0]))
+
+            accumulated_active_energy_import_total_for_all_time.append(logs[i][1])
+            accumulated_active_energy_import_tariff_1_for_all_time.append(logs[i][2])
+            accumulated_active_energy_import_tariff_2_for_all_time.append(logs[i][3])
+            accumulated_active_energy_import_tariff_3_for_all_time.append(logs[i][4])
+            accumulated_active_energy_import_tariff_4_for_all_time.append(logs[i][5])
+            accumulated_active_energy_import_tariff_5_for_all_time.append(logs[i][6])
+            accumulated_active_energy_import_tariff_6_for_all_time.append(logs[i][7])
+            accumulated_active_energy_import_tariff_7_for_all_time.append(logs[i][8])
+            accumulated_active_energy_import_tariff_8_for_all_time.append(logs[i][9])
+
+            accumulated_active_energy_export_total_for_all_time.append(logs[i][10])
+            accumulated_active_energy_export_tariff_1_for_all_time.append(logs[i][11])
+            accumulated_active_energy_export_tariff_2_for_all_time.append(logs[i][12])
+            accumulated_active_energy_export_tariff_3_for_all_time.append(logs[i][13])
+            accumulated_active_energy_export_tariff_4_for_all_time.append(logs[i][14])
+            accumulated_active_energy_export_tariff_5_for_all_time.append(logs[i][15])
+            accumulated_active_energy_export_tariff_6_for_all_time.append(logs[i][16])
+            accumulated_active_energy_export_tariff_7_for_all_time.append(logs[i][17])
+            accumulated_active_energy_export_tariff_8_for_all_time.append(logs[i][18])
+
+            total_reactive_energy_import.append(logs[i][19])
+            reactive_energy_at_tariff_1_import.append(logs[i][20])
+            reactive_energy_at_tariff_2_import.append(logs[i][21])
+            reactive_energy_at_tariff_3_import.append(logs[i][22])
+            reactive_energy_at_tariff_4_import.append(logs[i][23])
+            reactive_energy_at_tariff_5_import.append(logs[i][24])
+            reactive_energy_at_tariff_6_import.append(logs[i][25])
+            reactive_energy_at_tariff_7_import.append(logs[i][26])
+            reactive_energy_at_tariff_8_import.append(logs[i][27])
+
+            total_reactive_energy_export.append(logs[i][28])
+            reactive_energy_at_tariff_1_export.append(logs[i][29])
+            reactive_energy_at_tariff_2_export.append(logs[i][30])
+            reactive_energy_at_tariff_3_export.append(logs[i][31])
+            reactive_energy_at_tariff_4_export.append(logs[i][32])
+            reactive_energy_at_tariff_5_export.append(logs[i][33])
+            reactive_energy_at_tariff_6_export.append(logs[i][34])
+            reactive_energy_at_tariff_7_export.append(logs[i][35])
+            reactive_energy_at_tariff_8_export.append(logs[i][36])
+
+        else:
+            # Ветка для старых прошивок (4 тарифа) - адаптировано под структуру суточного профиля
+            time.append(ref_date_time(logs[i][0]))
+
+            accumulated_active_energy_import_total_for_all_time.append(logs[i][1])
+            accumulated_active_energy_import_tariff_1_for_all_time.append(logs[i][2])
+            accumulated_active_energy_import_tariff_2_for_all_time.append(logs[i][3])
+            accumulated_active_energy_import_tariff_3_for_all_time.append(logs[i][4])
+            accumulated_active_energy_import_tariff_4_for_all_time.append(logs[i][5])
+
+            accumulated_active_energy_export_total_for_all_time.append(logs[i][6])
+            accumulated_active_energy_export_tariff_1_for_all_time.append(logs[i][7])
+            accumulated_active_energy_export_tariff_2_for_all_time.append(logs[i][8])
+            accumulated_active_energy_export_tariff_3_for_all_time.append(logs[i][9])
+            accumulated_active_energy_export_tariff_4_for_all_time.append(logs[i][10])
+
+            total_reactive_energy_import.append(logs[i][11])
+            reactive_energy_at_tariff_1_import.append(logs[i][12])
+            reactive_energy_at_tariff_2_import.append(logs[i][13])
+            reactive_energy_at_tariff_3_import.append(logs[i][14])
+            reactive_energy_at_tariff_4_import.append(logs[i][15])
+
+            total_reactive_energy_export.append(logs[i][16])
+            reactive_energy_at_tariff_1_export.append(logs[i][17])
+            reactive_energy_at_tariff_2_export.append(logs[i][18])
+            reactive_energy_at_tariff_3_export.append(logs[i][19])
+            reactive_energy_at_tariff_4_export.append(logs[i][20])
+
+    # Формирование словаря аналогично месячному профилю
+    if 100 > proshivka > 18:
+        dictionary = {"Время фиксации записи": time,
+                      "Накопленная активная энергия (импорт) общая за все время": accumulated_active_energy_import_total_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 1 за все время': accumulated_active_energy_import_tariff_1_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 2 за все время': accumulated_active_energy_import_tariff_2_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 3 за все время': accumulated_active_energy_import_tariff_3_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 4 за все время': accumulated_active_energy_import_tariff_4_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 5 за все время': accumulated_active_energy_import_tariff_5_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 6 за все время': accumulated_active_energy_import_tariff_6_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 7 за все время': accumulated_active_energy_import_tariff_7_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 8 за все время': accumulated_active_energy_import_tariff_8_for_all_time,
+
+                      'Накопленная активная энергия (экспорт) общая за все время': accumulated_active_energy_export_total_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 1 за все время': accumulated_active_energy_export_tariff_1_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 2 за все время': accumulated_active_energy_export_tariff_2_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 3 за все время': accumulated_active_energy_export_tariff_3_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 4 за все время': accumulated_active_energy_export_tariff_4_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 5 за все время': accumulated_active_energy_export_tariff_5_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 6 за все время': accumulated_active_energy_export_tariff_6_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 7 за все время': accumulated_active_energy_export_tariff_7_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 8 за все время': accumulated_active_energy_export_tariff_8_for_all_time,
+
+                      'Суммарная реактивная энергия, импорт': total_reactive_energy_import,
+                      'Реактивная энергия по тарифу 1, импорт': reactive_energy_at_tariff_1_import,
+                      'Реактивная энергия по тарифу 2, импорт': reactive_energy_at_tariff_2_import,
+                      'Реактивная энергия по тарифу 3, импорт': reactive_energy_at_tariff_3_import,
+                      'Реактивная энергия по тарифу 4, импорт': reactive_energy_at_tariff_4_import,
+                      'Реактивная энергия по тарифу 5, импорт': reactive_energy_at_tariff_5_import,
+                      'Реактивная энергия по тарифу 6, импорт': reactive_energy_at_tariff_6_import,
+                      'Реактивная энергия по тарифу 7, импорт': reactive_energy_at_tariff_7_import,
+                      'Реактивная энергия по тарифу 8, импорт': reactive_energy_at_tariff_8_import,
+
+                      'Суммарная реактивная энергия, экспорт': total_reactive_energy_export,
+                      'Реактивная энергия по тарифу 1, экспорт': reactive_energy_at_tariff_1_export,
+                      'Реактивная энергия по тарифу 2, экспорт': reactive_energy_at_tariff_2_export,
+                      'Реактивная энергия по тарифу 3, экспорт': reactive_energy_at_tariff_3_export,
+                      'Реактивная энергия по тарифу 4, экспорт': reactive_energy_at_tariff_4_export,
+                      'Реактивная энергия по тарифу 5, экспорт': reactive_energy_at_tariff_5_export,
+                      'Реактивная энергия по тарифу 6, экспорт': reactive_energy_at_tariff_6_export,
+                      'Реактивная энергия по тарифу 7, экспорт': reactive_energy_at_tariff_7_export,
+                      'Реактивная энергия по тарифу 8, экспорт': reactive_energy_at_tariff_8_export
+                      }
+    else:
+        dictionary = {"Время фиксации записи": time,
+                      "Накопленная активная энергия (импорт) общая за все время": accumulated_active_energy_import_total_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 1 за все время': accumulated_active_energy_import_tariff_1_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 2 за все время': accumulated_active_energy_import_tariff_2_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 3 за все время': accumulated_active_energy_import_tariff_3_for_all_time,
+                      'Накопленная активная энергия (импорт) тариф 4 за все время': accumulated_active_energy_import_tariff_4_for_all_time,
+                      'Накопленная активная энергия (экспорт) общая за все время': accumulated_active_energy_export_total_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 1 за все время': accumulated_active_energy_export_tariff_1_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 2 за все время': accumulated_active_energy_export_tariff_2_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 3 за все время': accumulated_active_energy_export_tariff_3_for_all_time,
+                      'Накопленная активная энергия (экспорт) тариф 4 за все время': accumulated_active_energy_export_tariff_4_for_all_time,
+                      'Суммарная реактивная энергия, импорт': total_reactive_energy_import,
+                      'Реактивная энергия по тарифу 1, импорт': reactive_energy_at_tariff_1_import,
+                      'Реактивная энергия по тарифу 2, импорт': reactive_energy_at_tariff_2_import,
+                      'Реактивная энергия по тарифу 3, импорт': reactive_energy_at_tariff_3_import,
+                      'Реактивная энергия по тарифу 4, импорт': reactive_energy_at_tariff_4_import,
+                      'Суммарная реактивная энергия, экспорт': total_reactive_energy_export,
+                      'Реактивная энергия по тарифу 1, экспорт': reactive_energy_at_tariff_1_export,
+                      'Реактивная энергия по тарифу 2, экспорт': reactive_energy_at_tariff_2_export,
+                      'Реактивная энергия по тарифу 3, экспорт': reactive_energy_at_tariff_3_export,
+                      'Реактивная энергия по тарифу 4, экспорт': reactive_energy_at_tariff_4_export,
+                      }
     df = pd.DataFrame(dictionary)
     print("Суточный профиль записан")
     return df
@@ -1433,6 +1662,13 @@ def current_with_scalar(current):
 
 def power_with_scalar(power):
     return power * 0.001
+
+def vers_proshivki(open_and_close_connection):
+    proshivka = open_and_close_connection.read(GXDLMSData("0.0.96.1.8.255"), 2).decode('utf-8')
+    last_dot_index = proshivka.rfind(".")
+    version = proshivka[last_dot_index + 1:]
+    return int(version)
+
 
 
 def write_txt(file_name, text):

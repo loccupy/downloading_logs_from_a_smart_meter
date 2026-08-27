@@ -113,7 +113,7 @@ class UiForLogLoader(QWidget):
     def load_serial_numbers(self):
         try:
             self.list_of_serial = get_serial_numbers()
-            print(f"Загружено {len(self.list_of_serial)} серийных номеров")
+            print(f"Загружено {len(self.list_of_serial)} серийных номеров: {self.list_of_serial}.")
         except Exception as e:
             print(f"Не удалось получить серийные номера: {e}")
             self.list_of_serial = []
@@ -374,12 +374,12 @@ class UiForLogLoader(QWidget):
 
     def check_and_run_read_log_task(self):
         current_time = datetime.now()
-        if current_time.hour == 13 and current_time.minute == 0 and not self.is_read_log_thread_running():
+        if current_time.hour == 13 and current_time.minute == 30 and not self.is_read_log_thread_running():
             self.run_read_log_task()
 
     def check_and_run_meter_task(self):
         current_time = datetime.now()
-        if current_time.minute == 55 and current_time.hour != 13 and not self.is_meter_thread_running():
+        if current_time.minute == 10 and current_time.hour == 13 and not self.is_meter_thread_running():
             self.run_meter_task()
 
     def is_meter_thread_running(self):

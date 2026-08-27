@@ -1683,7 +1683,7 @@ def copy_data(file):
     try:
         source_dir = file
 
-        destination_dir = f'O:/12.Отдел разработки/_ПЕРЕЕЗД_Public/Отдел тестирования/Опрос и Выгрузка'
+        destination_dir = f'O:/12.Отдел разработки/Отдел тестирования/Отдел тестирования/Опрос и Выгрузка'
 
         # # Получаем имя исходной папки
         # source_folder_name = os.path.basename(os.path.normpath(source_dir))

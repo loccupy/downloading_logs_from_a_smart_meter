@@ -174,10 +174,6 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
     try:
         init_connect(reader, settings)
 
-        # Определение типа интерфейса
-        data = GXDLMSData('0.0.96.12.4.255')
-        # val = reader.read(data, 2)
-
         speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
         old_speed = reader.read(speed, 2)
         if old_speed != 5:
@@ -185,23 +181,6 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
             print("Устанавливаем скорость соединения на RS на 9600...")
             reader.write(speed, 2)
             config.baud = 9600
-
-        # if val == 18:
-        #     speed = GXDLMSHdlcSetup('0.1.22.0.0.255')
-        #     old_speed = reader.read(speed, 2)
-        #     if old_speed != 5:
-        #         speed.communicationSpeed = 5
-        #         print("Устанавливаем скорость соединения на RS на 9600...")
-        #         reader.write(speed, 2)
-        #         config.baud = 9600
-        # else:
-        #     speed = GXDLMSHdlcSetup('0.0.22.0.0.255')
-        #     old_speed = reader.read(speed, 2)
-        #     if old_speed != 5:
-        #         speed.communicationSpeed = 5
-        #         print("Устанавливаем скорость соединения ОПТОПОРТа на 9600...")
-        #         reader.write(speed, 2)
-        #         config.baud = 9600
         close_reader(reader)
         return None
     except Exception as e:
@@ -212,6 +191,11 @@ def setting_the_speed_to_default_values(config, attempt=1, max_attempts=3):
             print(f"Попытка подключения для сброса скорости {attempt} из {max_attempts} не удалась: {e}")
             print(f"Повторяем попытку через 2 секунды...")
             time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            if attempt == 1:
+                print(f"\nЗапускаю проверку скорости соединения при выгрузке...\n")
+                check_speed_for_meter_survey(config)
+            else:
+                install_ch340_windows()
             return setting_the_speed_to_default_values(
                 config,
                 attempt + 1,

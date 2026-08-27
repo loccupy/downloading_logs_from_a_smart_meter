@@ -1,4 +1,3 @@
-import os
 from time import sleep
 
 from libs.Utils import *
@@ -105,6 +104,11 @@ def read_type(config, main_directory, check_sample, attempt=1, max_attempts=3):
             print(f"Попытка подключения при считывании типа счетчика {attempt} из {max_attempts} не удалась: {e}")
             print(f"Повторяем попытку через 2 секунды...")
             sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            if attempt == 1:
+                # write_txt(file_name, f"\nЗапускаю проверку скорости соединения при опросе...\n")
+                check_speed_for_meter_survey(config)
+            else:
+                install_ch340_windows()
             return read_type(
                 config,
                 main_directory,

@@ -354,6 +354,8 @@ class UiForLogLoader(QWidget):
         copy_data(file_name)
 
     def start_read_meter_data(self):
+        print("Start")
+        self.read.setEnabled(False)
         try:
             if not self.com.text().strip():
                 raise ValueError("Поле COM не может быть пустым")
@@ -374,12 +376,12 @@ class UiForLogLoader(QWidget):
 
     def check_and_run_read_log_task(self):
         current_time = datetime.now()
-        if current_time.hour == 10 and current_time.minute == 40 and not self.is_read_log_thread_running():
+        if current_time.hour == 11 and current_time.minute == 10 and not self.is_read_log_thread_running():
             self.run_read_log_task()
 
     def check_and_run_meter_task(self):
         current_time = datetime.now()
-        if current_time.minute == 10 and current_time.hour == 50 and not self.is_meter_thread_running():
+        if current_time.hour == 11 and current_time.minute == 3 and not self.is_meter_thread_running():
             self.run_meter_task()
 
     def is_meter_thread_running(self):
@@ -416,9 +418,7 @@ class UiForLogLoader(QWidget):
         if not any(threads_running):
             self.read.setEnabled(True)
 
-    def on_analysis_finished(self, result):
-        self.analisys.setEnabled(True)
-        self.read.setEnabled(True)
+    def on_analysis_finished(self):
         self.thread = None
 
     def on_error(self, error_message):

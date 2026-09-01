@@ -1679,11 +1679,14 @@ def write_txt(file_name, text):
         message_in_out(f"Ошибка при записи данных в txt файл {file_name} при опросе >> {e}")
 
 
+from libs.settings import DATA_COPY_DESTINATION
+
+
 def copy_data(file):
     try:
         source_dir = file
 
-        destination_dir = f'O:/12.Отдел разработки/Отдел тестирования/Отдел тестирования/Опрос и Выгрузка'
+        destination_dir = DATA_COPY_DESTINATION
 
         # # Получаем имя исходной папки
         # source_folder_name = os.path.basename(os.path.normpath(source_dir))

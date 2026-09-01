@@ -10,6 +10,8 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread, QTimer
 from PyQt5.QtGui import QIntValidator, QTextCursor
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox
 
+from libs.settings import PASSWORD
+
 from libs.Utils import copy_data
 from libs.check_self_diagnostic_log import CheckSelfDiagnostic
 from libs.check_time import CheckTime
@@ -17,6 +19,7 @@ from libs.config import Config
 from libs.connect import setting_the_speed_to_default_values, connect_with_ip
 from libs.log_analysis_main import *
 from libs.read import read_logs, meter_survey
+from libs.settings import METER_SURVEY_START_TIME, LOG_EXPORT_START_TIME
 from libs.sending_message import clear_global_list, global_list, message_in_out
 from libs.test_get_info_from_rsm import get_serial_numbers
 
@@ -119,17 +122,17 @@ class UiForLogLoader(QWidget):
             self.list_of_serial = []
 
     def get_params(self):
-        try:
-            com = self.com.text().strip()
-            if not com or not com.isdigit():
-                raise ValueError("Поле COM должно быть непустым числом")
+            try:
+                com = self.com.text().strip()
+                if not com or not com.isdigit():
+                    raise ValueError("Поле COM должно быть непустым числом")
 
-            config = Config(com, None, '1234567898765432', self.flag_temperature,
-                            self.flag_viborka, self.first_date, self.second_date)
-            return config
-        except Exception as e:
-            print(f"Ошибка при получении параметров: {e}")
-            raise
+                config = Config(com, None, PASSWORD, self.flag_temperature,
+                                self.flag_viborka, self.first_date, self.second_date)
+                return config
+            except Exception as e:
+                print(f"Ошибка при получении параметров: {e}")
+                raise
 
     # def get_list_of_serial_numbers(self):
     #     try:
@@ -376,12 +379,12 @@ class UiForLogLoader(QWidget):
 
     def check_and_run_read_log_task(self): # выгрузка журналов
         current_time = datetime.now()
-        if current_time.hour == 11 and current_time.minute == 10 and not self.is_read_log_thread_running():
+        if (current_time.hour, current_time.minute) == LOG_EXPORT_START_TIME and not self.is_read_log_thread_running():
             self.run_read_log_task()
 
     def check_and_run_meter_task(self): # опрос счётчиков
         current_time = datetime.now()
-        if current_time.hour == 11 and current_time.minute == 3 and not self.is_meter_thread_running():
+        if (current_time.hour, current_time.minute) == METER_SURVEY_START_TIME and not self.is_meter_thread_running():
             self.run_meter_task()
 
     def is_meter_thread_running(self):

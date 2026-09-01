@@ -4,19 +4,19 @@ import random
 import time
 import traceback
 
-from libs.gurux.common import ReceiveParameters, GXCommon, TimeoutException
-from libs.gurux.common.enums import TraceLevel
-from libs.gurux.common.io import Parity, StopBits
-from libs.gurux.dlms import GXByteBuffer, GXReplyData, GXDLMSTranslator, GXDLMSException, GXDLMSAccessItem, \
+from gurux_lib.gurux.common import ReceiveParameters, GXCommon, TimeoutException
+from gurux_lib.gurux.common.enums import TraceLevel
+from gurux_lib.gurux.common.io import Parity, StopBits
+from gurux_lib.gurux.dlms import GXByteBuffer, GXReplyData, GXDLMSTranslator, GXDLMSException, GXDLMSAccessItem, \
     GXTime, GXDateTime, GXDate
-from libs.gurux.dlms.enums import ObjectType, Authentication, Conformance, DataType, \
+from gurux_lib.gurux.dlms.enums import ObjectType, Authentication, Conformance, DataType, \
     Security, AssociationResult, SourceDiagnostic, AccessServiceCommandType
-from libs.gurux.dlms.enums import InterfaceType
-from libs.gurux.dlms.objects import GXDLMSObject, GXDLMSObjectCollection, GXDLMSData, GXDLMSRegister, \
+from gurux_lib.gurux.dlms.enums import InterfaceType
+from gurux_lib.gurux.dlms.objects import GXDLMSObject, GXDLMSObjectCollection, GXDLMSData, GXDLMSRegister, \
     GXDLMSDemandRegister, GXDLMSProfileGeneric, GXDLMSExtendedRegister, GXDLMSDisconnectControl, \
     GXDLMSActivityCalendar, GXDLMSDayProfile, GXDLMSWeekProfile, GXDLMSSeasonProfile, GXDLMSDayProfileAction, \
     GXDLMSScriptTable, GXDLMSSpecialDaysTable
-from libs.gurux.net import GXNet
+from gurux_lib.gurux.net import GXNet
 
 
 class GXDLMSReader(GXDLMSDisconnectControl):

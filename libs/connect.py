@@ -1,7 +1,7 @@
 import time
 
 from libs.for_restart_driver import install_ch340_windows
-from libs.gurux.dlms.objects import GXDLMSData, GXDLMSHdlcSetup
+from gurux_lib.gurux.dlms.objects import GXDLMSData, GXDLMSHdlcSetup
 from libs.settings import PASSWORD, AUTHENTICATION, CLIENT_ADDRESS
 from gurux_lib.GXDLMSReader import GXDLMSReader
 from gurux_lib.GXSettings import GXSettings

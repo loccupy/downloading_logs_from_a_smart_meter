@@ -5,9 +5,9 @@ from datetime import datetime
 
 import pandas as pd
 
-from libs.gurux.dlms.objects import GXDLMSData
+from gurux_lib.gurux.dlms.objects import GXDLMSData
 from libs.connect import init_connect, close_reader, get_reader
-from libs.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
+from gurux_lib.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
 from libs.sending_message import message_in_out
 
 

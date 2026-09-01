@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from libs.Utils import write_txt
-from libs.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
+from gurux_lib.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
 from libs.sending_message import message_in_out
 
 

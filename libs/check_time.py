@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from libs.gurux.dlms.objects import GXDLMSClock
 from libs.sending_message import message_in_out
 
 

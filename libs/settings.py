@@ -10,7 +10,7 @@ CLIENT_ADDRESS = 48
 
 # (hour, minute) — время запуска задач
 METER_SURVEY_START_TIME = (11, 54)   # Опрос счётчиков
-LOG_EXPORT_START_TIME = (15, 30)    # Выгрузка журналов
+LOG_EXPORT_START_TIME = (16, 10)    # Выгрузка журналов
 
 # === Telegram уведомления ===
 TELEGRAM_BOT_TOKEN = '7938367301:AAFXCHUuNB3VCuB1Xl7BAISUY7kLpMXAp7o'

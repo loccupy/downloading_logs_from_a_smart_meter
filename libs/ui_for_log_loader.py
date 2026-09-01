@@ -6,6 +6,7 @@ from pathlib import Path
 from time import sleep
 
 from PyQt5 import uic, QtWidgets
+
 from PyQt5.QtCore import QTimer, QRegExp
 from PyQt5.QtGui import QIntValidator, QTextCursor, QRegExpValidator
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QComboBox
@@ -57,14 +58,8 @@ class UiForLogLoader(QWidget):
         self.file_names = []
 
     def init_ui(self):
-        current_dir = Path(__file__).parent
-        ui_path = current_dir / "maket_mass.ui"
-
-        if not ui_path.exists():
-            print(f"UI-файл не найден: {ui_path}")
-            raise FileNotFoundError(f"UI-файл не найден: {ui_path}")
-
-        uic.loadUi(str(ui_path), self)
+        ui_path = os.path.join(os.path.dirname(__file__), "maket_mass.ui")
+        uic.loadUi(ui_path, self)
 
         self.serial = self.findChild(QtWidgets.QLineEdit, 'serial_number_list')
         self.serial.setValidator(QRegExpValidator(QRegExp(r'^(\d{1,4},)*\d{1,4}$')))
@@ -131,7 +126,7 @@ class UiForLogLoader(QWidget):
             self.enable_all_fields()
             return
 
-        self.start_read_meter_data()
+        # self.start_read_meter_data()
         self.start_read_log_thread()
 
     def enable_all_fields(self):
@@ -277,14 +272,15 @@ class UiForLogLoader(QWidget):
                         f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
         else:
             message_in_out(f'#Выгрузка\n'
-                           f'При выгрузке журналов обнаружены ошибки!!!')
-            sleep(1)
-            parts = content.split('Для')
-            for part in parts: # надо пропустить первое Для!!!!
-                if part:  # Пропускаем пустые строки
-                    message_in_out('Для' + part)
-                    sleep(1)
-            message_in_out(f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+                           f'При выгрузке журналов обнаружены ошибки!!!'+ '\n' + content + '\n' +
+                           f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
+            # sleep(1)
+            # parts = content.split('Для')
+            # for part in parts: # надо пропустить первое Для!!!!
+            #     if part:  # Пропускаем пустые строки
+            #         message_in_out('Для' + part)
+            #         sleep(1)
+            # message_in_out(f'Время: {current_time.strftime("%d.%m.%Y %H:%M:%S")}')
 
         copy_data(main_directory)
 

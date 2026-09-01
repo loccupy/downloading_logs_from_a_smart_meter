@@ -33,12 +33,10 @@ def get_stand(cookies):
     return res
 
 
-def get_serial_numbers():
+def get_serial_numbers_from_stand(id_stand):
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     cookies = get_token()
-    stands = get_stand(cookies)
-    id_stand = stands['(Авто)стенд №3 ']
 
     response = requests.get(f'https://api.rsm.promenergo.local/api/Cell/Get/ByStandId/{id_stand}',
                             verify=False, headers=headers, cookies=cookies)

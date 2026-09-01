@@ -6,8 +6,9 @@ from datetime import datetime
 import pandas as pd
 
 from gurux_lib.gurux.dlms.objects import GXDLMSData
-from libs.connect import init_connect, close_reader, get_reader
+from libs.connect import init_connect, close_reader, get_reader, check_speed_for_meter_survey
 from gurux_lib.gurux.dlms.objects import GXDLMSProfileGeneric, GXDLMSClock
+from libs.for_restart_driver import install_ch340_windows
 from libs.sending_message import message_in_out
 
 
@@ -1517,6 +1518,11 @@ def create_sheet_in_excel_file(data, writer, sheet_name, config, check_sample, a
             print(f"Попытка {attempt} из {max_attempts} не удалась: {e}")
             print(f"Повторяем попытку через 2 секунды...")
             time.sleep(2)  # Ждем 2 секунды перед повторной попыткой
+            if attempt == 1:
+                # write_txt(file_name, f"\nЗапускаю проверку скорости соединения при опросе...\n")
+                check_speed_for_meter_survey(config)
+            else:
+                install_ch340_windows()
             return create_sheet_in_excel_file(
                 data,
                 writer,

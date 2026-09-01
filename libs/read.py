@@ -50,14 +50,13 @@ def read_data(config, time_for_check, time_for_check_self_diagnostic, file_name,
             print(f"Попытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}")
             write_txt(file_name,
                       f"\nПопытка подключения при опросе счетчика {attempt} из {max_attempts} не удалась: {e}\n")
-
+            print(f"Повторяем попытку через 2 секунды...")
+            sleep(2)  # Ждем 2 секунды перед повторной попыткой
             if attempt == 1:
                 write_txt(file_name, f"\nЗапускаю проверку скорости соединения при опросе...\n")
                 check_speed_for_meter_survey(config)
             else:
                 install_ch340_windows()
-            print(f"Повторяем попытку через 2 секунды...")
-            sleep(2)  # Ждем 2 секунды перед повторной попыткой
             return read_data(
                 config,
                 time_for_check,

@@ -9,7 +9,7 @@ AUTHENTICATION = "High"
 CLIENT_ADDRESS = 48
 
 # (hour, minute) — время запуска задач
-METER_SURVEY_START_TIME = (11, 3)   # Опрос счётчиков
+METER_SURVEY_START_TIME = (11, 54)   # Опрос счётчиков
 LOG_EXPORT_START_TIME = (11, 10)    # Выгрузка журналов
 
 # === Telegram уведомления ===

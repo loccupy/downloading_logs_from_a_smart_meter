@@ -1461,25 +1461,6 @@ EventAccessCode = [(1, "Попытка несанкционированного 
                    (4, "Ошибка верификации прошивки")]
 
 
-# def create_sheet_in_excel_file(data, writer, sheet_name, config, sample):
-#     global popitka
-#     try:
-#         reader_list = get_reader_with_ip(config.ip_meter, config.passw, config.serial_number, config.port_number)
-#         reader = reader_list[0]
-#         settings = reader_list[1]
-#         init_connect(reader, settings)
-#
-#         data(reader, sample).to_excel(writer, sheet_name=sheet_name, index=False)
-#
-#         close_reader(reader)
-#         sheet1 = writer.sheets[sheet_name]
-#         sheet1.set_column('A:A', 23)
-#         sheet1.set_column('B:B', 60)
-#         sheet1.set_column('C:U', 40)
-#     except Exception as e:
-#         print(f"Ошибка {e} при создании excel файла или считывании '{sheet_name}'")
-
-
 def create_sheet_in_excel_file(data, writer, sheet_name, config, check_sample, attempt=1, max_attempts=3):
     reader_list = get_reader(
         config.com_meter,
@@ -1509,7 +1490,6 @@ def create_sheet_in_excel_file(data, writer, sheet_name, config, check_sample, a
         sheet1.set_column('B:B', 60)
         sheet1.set_column('C:U', 40)
 
-        # print(f"Успешно создано: {sheet_name}")
         return None
 
     except Exception as e:

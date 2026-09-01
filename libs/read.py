@@ -185,4 +185,5 @@ def read_logs(config, main_directory, check_sample):
         return [file_name, device_type]
     except Exception as e:
         print(f'ОШИБКА ПРИ ОБЩЕМ СЧИТЫВАНИИ ЖУРНАЛОВ СЧЕТЧИКА №...{config.serial_number} >> {e} ')
+        message_in_out(f'ОШИБКА ПРИ ОБЩЕМ СЧИТЫВАНИИ ЖУРНАЛОВ СЧЕТЧИКА №...{config.serial_number} >> {e} ')
         raise
